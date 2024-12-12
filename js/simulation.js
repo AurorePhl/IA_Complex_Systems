@@ -1,4 +1,3 @@
-
 function initGrid(city,taille) {
     // Initialisation de la grille de la ville  
 
