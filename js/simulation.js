@@ -1,27 +1,25 @@
-// Initialisation de la grille de la ville  
-let taille = 10;
 
-let city = new Array(taille);
+function initGrid(taille, cellSize) {
+    // Initialisation de la grille de la ville  
 
-for (var i = 0; i < taille; i++) {
-    city[i]=new Array(taille);
-    for (var j = 0; j < taille; j++) {
-        city[i][j] = false;
+    let city = new Array(taille);
+
+    for (var i = 0; i < taille; i++) {
+        city[i] = new Array(taille);
+        for (var j = 0; j < taille; j++) {
+            city[i][j] = false;
+        }
     }
-}
 
-let cellSize = 50; 
-let svgContent = ''; 
+    let svgContent = '';
 
-for (let i = 0; i < taille; i++) { 
-    for (let j = 0; j < taille; j++) { 
-        let color = city[i][j] ? "black" : "white"; 
-        svgContent += `<rect x="${j * cellSize}" y="${i * cellSize}" width="${cellSize}" height="${cellSize}" fill="${color}" stroke="black" />`; 
-    } 
-} 
+    for (let i = 0; i < taille; i++) {
+        for (let j = 0; j < taille; j++) {
+            let color = city[i][j] ? "black" : "white";
+            svgContent += `<rect x="${j * cellSize}" y="${i * cellSize}" width="${cellSize}" height="${cellSize}" fill="${color}" stroke="black" />`;
+        }
+    }
 
-
-document.addEventListener('DOMContentLoaded', function () {
     const grid = document.getElementById('grid');
 
     // Définir la largeur et la hauteur de l'élément SVG
@@ -30,5 +28,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Ajouter le contenu SVG
     grid.innerHTML = svgContent;
+}
+
+
+// Appel au chargement de la page 
+document.addEventListener('DOMContentLoaded', function () {
+    
+    initGrid(10,50);
+
+    
 });
 
