@@ -10,7 +10,7 @@ for (var i = 0; i < taille; i++) {
     }
 }
 
-let cellSize = 20; 
+let cellSize = 50; 
 let svgContent = ''; 
 
 for (let i = 0; i < taille; i++) { 
