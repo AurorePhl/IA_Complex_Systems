@@ -78,8 +78,12 @@ document.addEventListener('DOMContentLoaded', async function () {
     grid.innerHTML = svgContent;
 
     await sleep(2000);
-    // Allumer un feu et mettre à jour la grille
-    startFire(city, 5, 1);
-    svgContent = updateGrid(city, taille, cellSize);
+    // Allumer un feu aléatoire et mettre à jour la grille
+    let x = Math.floor(Math.random() * taille);
+    let y = Math.floor(Math.random() * taille);
+    startFire(city, x, y);
+    svgContent = updateGrid(city, taille, cellSize, robots);
     grid.innerHTML = svgContent;
+
+    
 });
