@@ -7,10 +7,15 @@
     <meta charset="UTF-8"> 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Simulation d'incendie</title>
+
 </head>
 
 <body>
-    <svg id="grid" xmlns="http://www.w3.org/2000/svg"></svg>
+
+    <div class="container">
+        <p class="para">Pour le moment, les robots bougent aléatoirement toutes les 0.5s (haut, bas, gauche, droite). Dès qu'ils ont trouvé un survivant (triangle), ils le récupèrent, envoient l'information à la base (compte des survivants). Ils se redirigent automatiquement vers le QG (comme pour le poser après avoir prévenu le QG) avec une fonction de chemin le plus proche. Sur le chemin du retour, ils ne peuvent plus prendre de survivants.</p>
+        <svg id="grid" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
 </body>
 
 </html>
