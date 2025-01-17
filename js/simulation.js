@@ -166,6 +166,20 @@ function sendInformation(city) {
     let mid = Math.floor(city.length / 2); // Récupérer la position du QG
     if (city[mid][mid].qg) { // Si un QG existe
         city[mid][mid].qg.nbSurvivants += 1; // Ajouter un survivant au QG
+        const survivantsCountDisplay = document.getElementById('survivantsCount'); // Affichage du nombre de survivants
+        const humansInDangerDisplay = document.getElementById('humansInDanger'); // Affichage du nombre d'humains en danger
+        survivantsCountDisplay.textContent = `Humains sauvés : ${city[mid][mid].qg.nbSurvivants}`; // Mise à jour du nombre de survivants
+        totalHumansInDanger = 0 ; // Initialisation du nombre d'humain en danger
+        // Parcours de la grille pour mettre à jour le nombre d'humain en danger
+        for (let i = 0; i < taille; i++) {
+            for (let j = 0; j < taille; j++) {
+                let cell = city[i][j];
+                if (cell.survivant && cell.fire) {
+                    totalHumansInDanger++;  // Si un humain est dans une case avec un incendie, il est en danger
+                }
+            }
+        }
+        humansInDangerDisplay.textContent = `Humains en danger : ${totalHumansInDanger}`; // Mise à jour du nombre d'humains en danger
     }
 }
 
