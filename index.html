@@ -1,28 +1,50 @@
+<!--
+-- TITRE : Structure HTML pour la simulation d'incendie
+-- DATE : 20/01/2025
+-- AUTEURES : DURET Laura et PHILIPPE Aurore 
+-->
+
 <!DOCTYPE html>
 <html>
 
 <head>
+    <!-- Lien vers la feuille de style externe (CSS) pour le design de la page -->
     <link rel="stylesheet" href="styles.css">
+    
+    <!-- Lien vers le script JavaScript qui gère la logique de la simulation -->
     <script src="js/simulation.js"></script>
-    <meta charset="UTF-8"> 
+    
+    <!-- Définition du jeu de caractères utilisé dans la page (UTF-8) -->
+    <meta charset="UTF-8">
+    
+    <!-- Permet à la page d'être responsive, s'adaptant aux différentes tailles d'écrans -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Titre de la page, visible dans l'onglet du navigateur -->
     <title>Simulation d'incendie</title>
 </head>
 
 <body>
 
+    <!-- Conteneur principal qui organise la mise en page de la simulation -->
     <div class="main-container">
-        <!-- Section centrale : SVG -->
+        
+        <!-- Div centrale contenant la grille SVG de la simulation -->
         <div class="container">
+            <!-- Grille SVG qui représente visuellement la simulation d'incendie -->
             <svg id="grid" xmlns="http://www.w3.org/2000/svg"></svg>
         </div>
 
-        <!-- Section de la légende et paramètres -->
+        <!-- Div pour la légende et les paramètres de la simulation -->
         <div class="legend">
+            <!-- Titre principal de la page -->
             <h1 id="title">Simulation d'incendie</h1>
 
+            <!-- Titre pour la section des légendes des symboles -->
             <h2>Légendes : </h2>
+            <!-- Liste des éléments de la légende qui expliquent les symboles dans la grille -->
             <ul>
+                <!-- Élément de légende pour l'incendie (carré rouge) -->
                 <li>
                     <span class="legend-item">
                         <svg width="20" height="20">
@@ -31,6 +53,7 @@
                         <span>Incendie</span>
                     </span>
                 </li>
+                <!-- Élément de légende pour le Quartier Général (QG) (carré gris) -->
                 <li>
                     <span class="legend-item">
                         <svg width="20" height="20">
@@ -39,6 +62,7 @@
                         <span>Quartier Général (QG)</span>
                     </span>
                 </li>
+                <!-- Élément de légende pour un survivant (triangle vert) -->
                 <li>
                     <span class="legend-item">
                         <svg width="20" height="20">
@@ -47,6 +71,7 @@
                         <span>Survivant</span>
                     </span>
                 </li>
+                <!-- Élément de légende pour un robot (cercle) -->
                 <li>
                     <span class="legend-item">
                         <svg width="20" height="20">
@@ -57,16 +82,25 @@
                 </li>
             </ul>
 
+            <!-- Titre pour la section des paramètres de simulation -->
             <h2>Paramètres : </h2>
-<!--             <p class="para">Pour le moment, les robots bougent aléatoirement toutes les 0.5s (haut, bas, gauche, droite). Dès qu'ils ont trouvé un survivant (triangle), ils le récupèrent, envoient l'information à la base (compte des survivants). Ils se redirigent automatiquement vers le QG (comme pour le poser après avoir prévenu le QG) avec une fonction de chemin le plus proche. Sur le chemin du retour, ils ne peuvent plus prendre de survivants.</p>
- -->            <div>
+            
+            <!-- Section pour l'affichage et la gestion des robots -->
+            <div>
+                <!-- Affichage du nombre actuel de robots dans la simulation -->
                 <span id="robotCount">Robots : 7</span>
+                <!-- Boutons pour ajouter ou supprimer un robot -->
                 <button id="addRobot">+</button>
                 <button id="removeRobot">-</button>
             </div>
+            
+            <!-- Section pour ajuster la vitesse des robots -->
             <div>
+                <!-- Affichage du texte de la vitesse des robots -->
                 <span id="robotSpeed">Vitesse des robots : </span>
+                <!-- Contrôle pour définir la vitesse des robots (valeur numérique avec un pas de 0.1) -->
                 <input type="number" id="robotSpeedPara" step="0.1" value="0.5">
+                <!-- Affichage du texte pour l'unité de la vitesse (secondes) -->
                 <span id="speedDisplay"> secondes</span>
             </div>
         </div>
