@@ -68,7 +68,7 @@
                         <svg width="20" height="20">
                             <polygon points="10,0 0,20 20,20" fill="green" />
                         </svg>
-                        <span>Survivant</span>
+                        <span>Humain</span>
                     </span>
                 </li>
                 <!-- Élément de légende pour un robot (cercles) -->
@@ -103,17 +103,27 @@
             <!-- Titre pour la section des paramètres de simulation -->
             <h2>Paramètres : </h2>
             
-            <!-- Section pour l'affichage et la gestion des robots -->
+            <!-- Div pour l'affichage et la gestion des robots -->
             <div>
                 <!-- Bouton pour supprimer un robot -->
                 <button id="removeRobot">-</button>
                 <!-- Affichage du nombre actuel de robots dans la simulation -->
-                <span id="robotCount">Robots : 7</span>
+                <span id="robotCount">Total robots : 7</span>
                 <!-- Bouton pour ajouter un robot -->
                 <button id="addRobot">+</button>
             </div>
+
+            <!-- Div pour l'affichage et la gestion des survivants -->
+            <div>
+                <!-- Affichage du nombre actuel de survivants dans la simulation -->
+                <span id="humansCount">Total humains : 0</span>
+                <!-- Bouton pour ajouter un humain -->
+                <button id="addHuman">+</button>
+                <span id="humansInDanger">Humains en danger : 0</span>
+                <span id="survivantsCount">Humains sauvés : 0</span>
+            </div>
             
-            <!-- Section pour ajuster la vitesse des robots -->
+            <!-- Div pour ajuster la vitesse des robots -->
             <div>
                 <!-- Affichage du texte de la vitesse des robots -->
                 <div id="robotSpeed">Vitesse des robots : </div>

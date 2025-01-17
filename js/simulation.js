@@ -242,6 +242,9 @@ document.addEventListener('DOMContentLoaded', async function () {
     let robots = []; // Liste vide pour les robots
     let intervalId; // ID pour gérer l'intervalle de mouvement des robots
     let robotSpeed = 500; // Vitesse des robots en millisecondes
+    let totalSurvivants = 0;  // Nombre total de survivants
+    let totalHumans = 0;  // Nombre total d'humains
+    let totalHumansInDanger = 0;  // Nombre d'humains en danger
 
     // ================================================================
     // ÉLÉMENTS DU DOM (Interface utilisateur)
@@ -251,6 +254,10 @@ document.addEventListener('DOMContentLoaded', async function () {
     const removeRobotButton = document.getElementById('removeRobot'); // Bouton pour supprimer un robot
     const robotCountDisplay = document.getElementById('robotCount'); // Affichage du nombre de robots
     const robotSpeedInput = document.getElementById('robotSpeedPara'); // Entrée pour ajuster la vitesse des robots
+    const survivantsCountDisplay = document.getElementById('survivantsCount'); // Affichage du nombre de survivants
+    const humansCountDisplay = document.getElementById('humansCount'); // Affichage du nombre total d'humains
+    const humansInDangerDisplay = document.getElementById('humansInDanger'); // Affichage du nombre d'humains en danger
+    const addHumanButton = document.getElementById('addHuman'); // Bouton pour ajouter un humain 
 
     // ================================================================
     // LISTENERS POUR LES ÉVÉNEMENTS
@@ -264,8 +271,40 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     // Mettre à jour le compteur de robots
     const updateRobotCount = () => {
-        robotCountDisplay.textContent = `Robots : ${robots.length}`; // Afficher le nombre de robots
+        robotCountDisplay.textContent = `Total robots : ${robots.length}`; // Afficher le nombre de robots
     };
+
+    const updateHumansCount = () => {
+        // Réinitialiser les compteurs avant de les mettre à jour
+        totalHumans = 0;
+        totalHumansInDanger = 0;
+        totalSurvivants = 0;
+        // Parcours de la grille pour mettre à jour les comptages
+        for (let i = 0; i < taille; i++) {
+            for (let j = 0; j < taille; j++) {
+                let cell = city[i][j];
+                if (cell.survivant) {
+                    totalHumans++;  // On compte les humains
+                    if (cell.fire) {
+                        totalHumansInDanger++;  // Si un humain est dans une case avec un incendie, il est en danger
+                    }
+                    if (cell.qg) {
+                        totalSurvivants += cell.qg.nbSurvivants; // Si un humain est au qg, il est sauvé et devient un survivant
+                    }
+                }
+            }
+        }
+        humansCountDisplay.textContent = `Total humains : ${totalHumans}`;
+        survivantsCountDisplay.textContent = `Humains sauvés : ${totalSurvivants}`;
+        humansInDangerDisplay.textContent = `Humains en danger : ${totalHumansInDanger}`;
+    }
+
+    // Ajouter un survivant
+    document.getElementById('addHuman').addEventListener('click', () => {
+        // Appel de placeSurvivant pour ajouter un survivant à la grille
+        placeSurvivants(city, taille, 1);
+        updateHumansCount();
+    });
 
     // Ajouter un robot
     addRobotButton.addEventListener('click', () => {
@@ -347,6 +386,9 @@ document.addEventListener('DOMContentLoaded', async function () {
     // Mettre à jour le compteur de robots affiché
     updateRobotCount();
 
+    // Mettre à jour les compteurs relatifs aux humains
+    updateHumansCount();
+
     // Ajouter un délai de 2 secondes avant de démarrer un incendie
     await sleep(2000);
 
@@ -358,4 +400,6 @@ document.addEventListener('DOMContentLoaded', async function () {
     // Mettre à jour la grille après avoir allumé le feu
     svgContent = updateGrid(city, taille, cellSize, robots);
     grid.innerHTML = svgContent;  // Afficher la grille mise à jour avec le feu
+
+    updateHumansCount();
 });
