@@ -71,11 +71,29 @@
                         <span>Survivant</span>
                     </span>
                 </li>
-                <!-- Élément de légende pour un robot (cercle) -->
+                <!-- Élément de légende pour un robot (cercles) -->
                 <li>
                     <span class="legend-item">
                         <svg width="20" height="20">
+                            <circle cx="10" cy="10" r="5" fill="red" />
+                        </svg>
+                        <svg width="20" height="20">
+                            <circle cx="10" cy="10" r="5" fill="orange" />
+                        </svg>
+                        <svg width="20" height="20">
+                            <circle cx="10" cy="10" r="5" fill="yellow" />
+                        </svg>
+                        <svg width="20" height="20">
+                            <circle cx="10" cy="10" r="5" fill="green" />
+                        </svg>
+                        <svg width="20" height="20">
                             <circle cx="10" cy="10" r="5" fill="blue" />
+                        </svg>
+                        <svg width="20" height="20">
+                            <circle cx="10" cy="10" r="5" fill="pink" />
+                        </svg>
+                        <svg width="20" height="20">
+                            <circle cx="10" cy="10" r="5" fill="violet" />
                         </svg>
                         <span>Robot</span>
                     </span>
@@ -87,17 +105,18 @@
             
             <!-- Section pour l'affichage et la gestion des robots -->
             <div>
+                <!-- Bouton pour supprimer un robot -->
+                <button id="removeRobot">-</button>
                 <!-- Affichage du nombre actuel de robots dans la simulation -->
                 <span id="robotCount">Robots : 7</span>
-                <!-- Boutons pour ajouter ou supprimer un robot -->
+                <!-- Bouton pour ajouter un robot -->
                 <button id="addRobot">+</button>
-                <button id="removeRobot">-</button>
             </div>
             
             <!-- Section pour ajuster la vitesse des robots -->
             <div>
                 <!-- Affichage du texte de la vitesse des robots -->
-                <span id="robotSpeed">Vitesse des robots : </span>
+                <div id="robotSpeed">Vitesse des robots : </div>
                 <!-- Contrôle pour définir la vitesse des robots (valeur numérique avec un pas de 0.1) -->
                 <input type="number" id="robotSpeedPara" step="0.1" value="0.5">
                 <!-- Affichage du texte pour l'unité de la vitesse (secondes) -->

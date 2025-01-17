@@ -87,10 +87,10 @@
 }
 
 /* ================================================================
-   Style pour les icônes SVG dans la légende
+   Style pour les labels des icônes SVG dans la légende
    ================================================================ */
-.legend-item svg {
-    margin-right: 10px;              /* Ajouter un espacement à droite des icônes */
+.legend-item span {
+    margin-left: 10px;              /* Ajouter un espacement à droite des icônes */
 }
 
 /* ================================================================
@@ -121,3 +121,11 @@ button:hover {
     background-color: darkslategrey; /* Changer la couleur de fond lorsque l'on survole le bouton */
     cursor: pointer;                /* Changer le curseur en pointeur pour indiquer l'interaction */
 }
+
+/* ================================================================
+   Style pour ajuster la largeur de l'input
+   ================================================================ */
+input[type="number"] {
+    width: 100px; /* Ajuster la valeur de la largeur de l'input */
+}
+
