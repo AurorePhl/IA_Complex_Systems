@@ -7,15 +7,71 @@
     <meta charset="UTF-8"> 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Simulation d'incendie</title>
-
 </head>
 
 <body>
 
-    <div class="container">
-        <p class="para">Pour le moment, les robots bougent aléatoirement toutes les 0.5s (haut, bas, gauche, droite). Dès qu'ils ont trouvé un survivant (triangle), ils le récupèrent, envoient l'information à la base (compte des survivants). Ils se redirigent automatiquement vers le QG (comme pour le poser après avoir prévenu le QG) avec une fonction de chemin le plus proche. Sur le chemin du retour, ils ne peuvent plus prendre de survivants.</p>
-        <svg id="grid" xmlns="http://www.w3.org/2000/svg"></svg>
+    <div class="main-container">
+        <!-- Section centrale : SVG -->
+        <div class="container">
+            <svg id="grid" xmlns="http://www.w3.org/2000/svg"></svg>
+        </div>
+
+        <!-- Section de la légende et paramètres -->
+        <div class="legend">
+            <h1 id="title">Simulation d'incendie</h1>
+
+            <h2>Légendes : </h2>
+            <ul>
+                <li>
+                    <span class="legend-item">
+                        <svg width="20" height="20">
+                            <rect width="20" height="20" fill="red" />
+                        </svg>
+                        <span>Incendie</span>
+                    </span>
+                </li>
+                <li>
+                    <span class="legend-item">
+                        <svg width="20" height="20">
+                            <rect width="20" height="20" fill="#bfbfbf" />
+                        </svg>
+                        <span>Quartier Général (QG)</span>
+                    </span>
+                </li>
+                <li>
+                    <span class="legend-item">
+                        <svg width="20" height="20">
+                            <polygon points="10,0 0,20 20,20" fill="green" />
+                        </svg>
+                        <span>Survivant</span>
+                    </span>
+                </li>
+                <li>
+                    <span class="legend-item">
+                        <svg width="20" height="20">
+                            <circle cx="10" cy="10" r="5" fill="blue" />
+                        </svg>
+                        <span>Robot</span>
+                    </span>
+                </li>
+            </ul>
+
+            <h2>Paramètres : </h2>
+<!--             <p class="para">Pour le moment, les robots bougent aléatoirement toutes les 0.5s (haut, bas, gauche, droite). Dès qu'ils ont trouvé un survivant (triangle), ils le récupèrent, envoient l'information à la base (compte des survivants). Ils se redirigent automatiquement vers le QG (comme pour le poser après avoir prévenu le QG) avec une fonction de chemin le plus proche. Sur le chemin du retour, ils ne peuvent plus prendre de survivants.</p>
+ -->            <div>
+                <span id="robotCount">Robots : 7</span>
+                <button id="addRobot">+</button>
+                <button id="removeRobot">-</button>
+            </div>
+            <div>
+                <span id="robotSpeed">Vitesse des robots : </span>
+                <input type="number" id="robotSpeedPara" step="0.1" value="0.5">
+                <span id="speedDisplay"> secondes</span>
+            </div>
+        </div>
     </div>
+
 </body>
 
 </html>

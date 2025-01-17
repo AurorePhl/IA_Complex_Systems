@@ -94,6 +94,11 @@ function updateGrid(city, taille, cellSize,robots) {
     return svgContent;
 }
 
+// Fonction pour générer un ID aléatoire
+function generateRandomId() {
+    return Math.random().toString(36).substr(2, 9); // Génère un identifiant alphanumérique court
+}
+
  // Positionne 7 robots aléatoirement dans la grille
  function placeRobots(city,taille, count) {
     let robots = [];
@@ -103,17 +108,17 @@ function updateGrid(city, taille, cellSize,robots) {
 
     for (let i = 0; i < count; i++) {
         let color = robotColor[i % robotColor.length]; // couleur du robot
-        let robot = { x: mid, y: mid, id: i, color: color, hasSurvivor: false }; // caracteristiques du robot
+        let robot = { x: mid, y: mid, id: generateRandomId(), color: color, hasSurvivor: false }; // caracteristiques du robot
 
         city[mid][mid].robots.push(robot); // ajouter à city (caracteristiques des cellules)
         robots.push(robot); // ajouter à la liste des robots > peut etre a enlever
 
-        setInterval(() => { // bouger les robots
+/*         intervalId = setInterval(() => { // bouger les robots
             moveRobot(city, robot, taille); // bouger le robot
             const grid = document.getElementById('grid'); // mettre à jour la grille
             let svgContent = updateGrid(city, taille, 50, robots);  // mettre à jour la grille
             grid.innerHTML = svgContent; // mettre à jour la grille
-        }, 500); // bouger les robots toutes les secondes
+        }, 500); // bouger les robots toutes les secondes */
 
     }
     console.log('voici les robots', robots);
@@ -189,25 +194,128 @@ function moveRobot(city, robot, taille) {
     }
 }
 
+// Fonction pour créer l'intervalle de mouvement des robots
+function startRobotMovement(robots, city, taille, intervalId, grid, cellSize, robotSpeed) {
+    if (intervalId) {
+        clearInterval(intervalId);  // Si un intervalle existe, on le nettoie
+    }
+
+    // Crée un nouvel intervalle pour le mouvement des robots
+    intervalId = setInterval(() => {
+        robots.forEach(robot => {
+            moveRobot(city, robot, taille); // Bouger chaque robot
+        });
+        let svgContent = updateGrid(city, taille, cellSize, robots);  // Mettre à jour la grille
+        grid.innerHTML = svgContent; // Mettre à jour la grille
+    }, robotSpeed); // Bouger les robots toutes les secondes
+
+    return intervalId;  // Retourner l'intervalId pour une gestion future
+}
+
+
+
 // Appel au chargement de la page
 document.addEventListener('DOMContentLoaded', async function () {
+    const grid = document.getElementById('grid');
+    const addRobotButton = document.getElementById('addRobot');
+    const removeRobotButton = document.getElementById('removeRobot');
+    const robotCountDisplay = document.getElementById('robotCount'); 
+    const robotSpeedInput = document.getElementById('robotSpeedPara');
+
     let taille = 15;
     let cellSize = 50;
     let city = new Array(taille);
+    let robotCount = 7; // Nombre de robots à placer
+    let robots = [];
+    let intervalId ;
+    let robotSpeed = 500;
+
+    // Modifier vitesse des robots 
+    robotSpeedInput.addEventListener('input', function (e) {
+        robotSpeed = parseFloat(e.target.value) * 1000; // Convertir la vitesse en ms
+        // Réajuster l'intervalle avec la nouvelle vitesse
+        intervalId = startRobotMovement(robots, city, taille, intervalId, grid, cellSize, robotSpeed);
+    });
 
     // Initialiser la grille
     initGrid(city, taille);
 
     // Placer les robots
-    let robots = placeRobots(city,taille, 7);
+    robots = placeRobots(city,taille, robotCount);
 
-    const grid = document.getElementById('grid');
+    // Faire bouger les robots 
+    intervalId = startRobotMovement(robots, city, taille, intervalId, grid, cellSize, robotSpeed);
+
     grid.setAttribute('width', taille * cellSize);
     grid.setAttribute('height', taille * cellSize);
 
     // Mettre à jour et afficher la grille initiale
     let svgContent = updateGrid(city, taille, cellSize, robots);
     grid.innerHTML = svgContent;
+
+    // Mettre à jour le compteur de robots
+    const updateRobotCount = () => {
+        robotCountDisplay.textContent = `Robots : ${robots.length}`;
+    };
+
+    // Ajouter un robot
+    addRobotButton.addEventListener('click', () => {
+        if (robotCount < taille * taille) { // Limite au nombre total de cellules
+            robotCount++;
+            let mid = Math.floor(taille / 2);
+            let color = ['red', 'blue', 'green', 'yellow', 'purple', 'orange', 'pink'][robotCount % 7];
+            let robot = { x: mid, y: mid, id: generateRandomId(), color: color, hasSurvivor: false };
+            robots.push(robot);
+            city[mid][mid].robots.push(robot); // Ajouter le robot au QG
+
+            updateRobotCount();
+
+            intervalId = startRobotMovement(robots, city, taille, intervalId, grid, cellSize, robotSpeed);
+        }
+    });
+
+    removeRobotButton.addEventListener('click', () => {
+        if (robotCount > 0) {
+            // Choisir un index aléatoire parmi les robots globaux
+            let randomIndex = Math.floor(Math.random() * robots.length);
+            let robot = robots[randomIndex];
+    
+            if (robot) {
+                // Supprimer le robot de la liste des robots globaux
+                robots.splice(randomIndex, 1);
+    
+                // Retirer le robot de la cellule correspondante dans `city`
+                let cell = city[robot.x][robot.y];
+                if (cell.robots) {
+                    cell.robots = cell.robots.filter(r => r.id !== robot.id);
+                }
+    
+                // Mettre à jour la grille SVG
+                svgContent = updateGrid(city, taille, cellSize, robots);
+                grid.innerHTML = svgContent;
+    
+                // Mettre à jour l'affichage du compteur de robots
+                updateRobotCount();
+
+                // Si il n'y a plus de robots, nettoyer l'intervalle
+            if (robots.length === 0) {
+                clearInterval(intervalId);
+            } else {
+                // Si des robots restent, redémarrez l'intervalle
+                intervalId = startRobotMovement(robots, city, taille, intervalId, grid, cellSize, robotSpeed);
+            }
+    
+                console.log("Robot supprimé :", robot);
+                console.log("Robots restants dans la cellule :", cell.robots);
+                console.log("Nombre total de robots :", robots.length);
+            }
+        }
+    });
+      
+
+    svgContent = updateGrid(city, taille, cellSize, robots);
+    grid.innerHTML = svgContent;
+    updateRobotCount();
 
     await sleep(2000);
     // Allumer un feu aléatoire et mettre à jour la grille
@@ -217,5 +325,5 @@ document.addEventListener('DOMContentLoaded', async function () {
     svgContent = updateGrid(city, taille, cellSize, robots);
     grid.innerHTML = svgContent;
 
-    
+
 });
