@@ -200,7 +200,7 @@ function moveRobot(city, robot, taille) {
         // Gérer les actions si le robot rencontre un survivant ou le QG
         if (robot.hasSurvivor && city[newX][newY].qg) {
             robot.hasSurvivor = false; // Déposer le survivant au QG
-        } else if (!robot.hasSurvivor && city[newX][newY].survivant) {
+        } else if (!robot.hasSurvivor && city[newX][newY].survivant && city[newX][newY].fire) {
             robot.hasSurvivor = true; // Ramasser un survivant
             sendInformation(city); // Envoyer l'information au QG
             city[newX][newY].survivant = false; // Retirer le survivant de la cellule
