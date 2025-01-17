@@ -10,7 +10,7 @@
 
 // Fonction d'initialisation de la grille de la ville
 // Crée une grille carrée de taille 'taille' avec des cases initialisées à des valeurs par défaut
-function initGrid(city, taille) {
+function initGrid(city, taille, survivorCount) {
     // Initialisation des cases de la grille avec des objets représentant des états de cellule
     for (var i = 0; i < taille; i++) {
         city[i] = new Array(taille); // Création d'un tableau pour chaque ligne
@@ -19,8 +19,9 @@ function initGrid(city, taille) {
             city[i][j] = {
                 fire: false, // Pas de feu initialement
                 robots: [], // Liste vide de robots sur la case
-                survivant: false, // Pas de survivant sur la case au départ
-                qg: null // Pas de QG par défaut
+                survivant: { present: false, mort: false }, // Pas de survivant sur la case au départ
+                qg: null, // Pas de QG par défaut
+                cri: null, // Pas de cri par défaut,  plus tard associé à la position du survivant pour le retrouver directement
             };
         }
     }
@@ -28,11 +29,13 @@ function initGrid(city, taille) {
     // Positionner le quartier général (QG) au centre de la grille
     let mid = Math.floor(taille / 2);
     city[mid][mid].qg = {
-        nbSurvivants: 0 // Initialisation du nombre de survivants au QG
+        nbSurvivants: 0, // Initialisation du nombre de survivants au QG
+        nbMort: 0, // Initialisation du nombre de morts au QG
+        nbTotalSurvivants : survivorCount // Nombre total de survivants à sauver
     };
 
     // Placement aléatoire des survivants sur la grille
-    placeSurvivants(city, taille, 10);
+    placeSurvivants(city, taille, survivorCount);
 
     return city; // Retourner la grille initialisée
 }
@@ -43,8 +46,9 @@ function placeSurvivants(city, taille, count) {
         let x = Math.floor(Math.random() * taille); // Coordonnée x aléatoire
         let y = Math.floor(Math.random() * taille); // Coordonnée y aléatoire
         // Vérification si la case n'est pas déjà occupée par un survivant ou un QG
-        if (!city[x][y].survivant && !city[x][y].qg) {
-            city[x][y].survivant = true; // Placer un survivant
+        if (!city[x][y].survivant.present && !city[x][y].qg) {
+            city[x][y].survivant.present = true; // Placer un survivant
+            addCriSurvivants(city, x, y, taille); // Ajouter un cri aux cellules adjacentes
             count--; // Décrémenter le compteur de survivants
         }
     }
@@ -77,6 +81,8 @@ function updateGrid(city, taille, cellSize, robots) {
             let color = cell.fire ? "red" : "white"; // Si la cellule est en feu, la couleur est rouge
             if (cell.qg) {
                 color = "#bfbfbf"; // Couleur grise pour le QG
+            } else if (cell.messageRetourQG) {
+                color = "#d3d3d3"; // Couleur grisée claire pour les messages de diffusion retour au QG
             }
             // Dessiner un rectangle représentant la cellule
             svgContent += `<rect x="${j * cellSize}" y="${i * cellSize}" width="${cellSize}" height="${cellSize}" fill="${color}" stroke="black" />`;
@@ -88,12 +94,13 @@ function updateGrid(city, taille, cellSize, robots) {
                     svgContent += `<circle cx="${j * cellSize + pos.cx}" cy="${i * cellSize + pos.cy}" r="${cellSize / 8}" fill="${robot.color}" />`;
                 });
             }
-            // Dessiner les survivants si présents sur la cellule
-            if (cell.survivant) {
+            // Dessiner les survivants si présents et pas morts sur la cellule
+            if (cell.survivant.present ) {
                 let x = j * cellSize + cellSize / 2;
                 let y = i * cellSize + cellSize / 2;
                 let size = cellSize / 4;
-                svgContent += `<polygon points="${x},${y - size} ${x - size},${y + size} ${x + size},${y + size}" fill="green" />`;
+                let fillColor = cell.survivant.mort ? "black" : "green";
+                svgContent += `<polygon points="${x},${y - size} ${x - size},${y + size} ${x + size},${y + size}" fill="${fillColor}" />`;
             }
             // Dessiner le QG et afficher le nombre de survivants
             if (cell.qg) {
@@ -104,6 +111,16 @@ function updateGrid(city, taille, cellSize, robots) {
                 let triangleX = x + cellSize / 4;
                 let triangleY = y - cellSize / 8;
                 svgContent += `<polygon points="${triangleX},${triangleY} ${triangleX - triangleSize},${triangleY + triangleSize} ${triangleX + triangleSize},${triangleY + triangleSize}" fill="green" />`;
+                if (cell.qg.nbMort > 0) {
+                    let blackTriangleX = x + cellSize / 4; // Ajuster la position du triangle noir à droite du nombre de morts
+                    let blackTriangleY = y + cellSize / 4;
+                    svgContent += `<text x="${x}" y="${y + cellSize / 4}" font-size="${cellSize / 4}" text-anchor="middle" fill="black">${cell.qg.nbMort}</text>`;
+                    svgContent += `<polygon points="${blackTriangleX},${blackTriangleY} ${blackTriangleX - triangleSize},${blackTriangleY + triangleSize} ${blackTriangleX + triangleSize},${blackTriangleY + triangleSize}" fill="black" />`;
+                }
+            }
+            // Dessiner les cris, peut etre a enlever pour que ce soit plus lisible
+            if (cell.cri) {
+                svgContent += `<line x1="${j * cellSize}" y1="${i * cellSize}" x2="${(j + 1) * cellSize}" y2="${(i + 1) * cellSize}" stroke="green" stroke-width="2" />`;
             }
         }
     }
@@ -124,7 +141,7 @@ function placeRobots(city, taille, count) {
 
     for (let i = 0; i < count; i++) {
         let color = robotColor[i % robotColor.length]; // Choisir une couleur de robot
-        let robot = { x: mid, y: mid, id: generateRandomId(), color: color, hasSurvivor: false }; // Créer un robot avec ses attributs
+        let robot = { x: mid, y: mid, id: generateRandomId(), color: color, hasSurvivor: false, stopped: false  }; // Créer un robot avec ses attributs
 
         city[mid][mid].robots.push(robot); // Ajouter le robot au QG
         robots.push(robot); // Ajouter à la liste des robots
@@ -140,6 +157,21 @@ function placeRobots(city, taille, count) {
 function startFire(city, x, y) {
     if (x >= 0 && x < city.length && y >= 0 && y < city[x].length) {
         city[x][y].fire = true; // Allumer un feu sur la cellule spécifiée
+        checkSurvivorDeath(city, x, y);
+    }
+}
+
+// fonction temporaire pour allumer plusieurs feux
+function startMultipleFires(city, count) {
+    let taille = city.length;
+    while (count > 0) {
+        let x = Math.floor(Math.random() * taille); // Coordonnée x aléatoire
+        let y = Math.floor(Math.random() * taille); // Coordonnée y aléatoire
+        if (!city[x][y].fire) { // Vérifier si la cellule n'est pas déjà en feu
+            startFire(city, x, y); // Allumer un feu
+            checkSurvivorDeath(city, x, y);
+            count--; // Décrémenter le compteur de feux
+        }
     }
 }
 
@@ -168,9 +200,48 @@ function sendInformation(city) {
         city[mid][mid].qg.nbSurvivants += 1; // Ajouter un survivant au QG
     }
 }
+function sendDeathInformation(city) {
+    let mid = Math.floor(city.length / 2);
+    if (city[mid][mid].qg) {
+        city[mid][mid].qg.nbMort += 1;
+    }
+}
+function checkSurvivorDeath(city, x, y) { // Vérifier si un survivant est mort
+    if (city[x][y].survivant.present && city[x][y].fire) {
+        setTimeout(() => {
+            if (city[x][y].survivant.present && city[x][y].fire) {
+                city[x][y].survivant.mort = true; // Marquer le survivant comme mort
+                console.log(`Survivant à (${x}, ${y}) est mort.`);
+            }
+        }, 1000); // Vérifier après 1 seconde
+    }
+}
+function diffuseRetourQG(city, taille) {
+    const mid = Math.floor(taille / 2);
+    const directions = [
+        { dx: 0, dy: -1 }, // Haut
+        { dx: 0, dy: 1 },  // Bas
+        { dx: -1, dy: 0 }, // Gauche
+        { dx: 1, dy: 0 },  // Droite
+        { dx: -1, dy: -1 }, // Haut-Gauche
+        { dx: 1, dy: -1 },  // Haut-Droite
+        { dx: -1, dy: 1 },  // Bas-Gauche
+        { dx: 1, dy: 1 }    // Bas-Droite
+    ];
 
-// Fonction pour déplacer un robot à une position voisine
-function moveRobot(city, robot, taille) {
+    directions.forEach(direction => {
+        for (let i = 1; i <= 4; i++) { // Étendre la portée à 3 cases
+            const newX = mid + direction.dx * i;
+            const newY = mid + direction.dy * i;
+            if (newX >= 0 && newX < taille && newY >= 0 && newY < taille) {
+                city[newX][newY].messageRetourQG = true; // Ajouter un message pour attirer les robots
+            }
+        }
+    });
+}
+
+// Fonction pour enlever un cri des cellules adjacentes dès qu'un survivant est sauvé
+function removeCriSurvivants(city, x, y, taille) {
     const directions = [
         { dx: 0, dy: -1 }, // Haut
         { dx: 0, dy: 1 },  // Bas
@@ -178,11 +249,56 @@ function moveRobot(city, robot, taille) {
         { dx: 1, dy: 0 }   // Droite
     ];
 
-    let direction; // Direction choisie pour le robot
-    if (robot.hasSurvivor) { // Si le robot porte un survivant
-        direction = getDirectionToQG(city, robot); // Aller vers le QG
-    } else {
-        direction = directions[Math.floor(Math.random() * directions.length)]; // Sinon, mouvement aléatoire
+    directions.forEach(direction => { // Pour chaque direction
+        const newX = x + direction.dx;
+        const newY = y + direction.dy;
+        if (newX >= 0 && newX < taille && newY >= 0 && newY < taille) { // Vérifier si la nouvelle position est valide
+            city[newX][newY].cri = null; // Enlever la référence au survivant
+        }
+    });
+}
+
+// Fonction pour ajouter un cri aux cellules adjacentes
+function addCriSurvivants(city, x, y, taille) {
+    const directions = [
+        { dx: 0, dy: -1 }, // Haut
+        { dx: 0, dy: 1 },  // Bas
+        { dx: -1, dy: 0 }, // Gauche
+        { dx: 1, dy: 0 }   // Droite
+    ];
+
+    directions.forEach(direction => { // Pour chaque direction
+        const newX = x + direction.dx;
+        const newY = y + direction.dy;
+        if (newX >= 0 && newX < taille && newY >= 0 && newY < taille) {
+            city[newX][newY].cri = { x, y }; // Ajouter une référence au survivant
+        }
+    });
+}
+
+// Fonction pour déplacer un robot à une position voisine
+function moveRobot(city, robot, taille) {
+    if (robot.stopped) return;  // Arrêter le robot s'il a déjà atteint le QG et que tout les survivants on été sauvés
+    
+    let direction;
+    if (robot.hasSurvivor) { // Si le robot a un survivant
+        direction = getDirectionToQG(city, robot); // Trouver la direction vers le QG
+    } else if (city[robot.x][robot.y].cri) { // Si un cri est entendu
+        let cri = city[robot.x][robot.y].cri; // Récupérer la position du survivant
+        direction = { // Trouver la direction vers le survivant
+            dx: Math.sign(cri.x - robot.x),
+            dy: Math.sign(cri.y - robot.y)
+        };
+    } else if (city[robot.x][robot.y].messageRetourQG) { // Si un message est entendu
+            direction = getDirectionToQG(city, robot); // Trouver la direction vers le QG
+    } else { // Si aucune information n'est disponible
+        const directions = [ 
+            { dx: 0, dy: -1 }, // Haut
+            { dx: 0, dy: 1 },  // Bas
+            { dx: -1, dy: 0 }, // Gauche
+            { dx: 1, dy: 0 }   // Droite
+        ];
+        direction = directions[Math.floor(Math.random() * directions.length)]; // Choisir une direction aléatoire
     }
 
     const newX = robot.x + direction.dx; // Nouvelle position en X
@@ -197,13 +313,27 @@ function moveRobot(city, robot, taille) {
 
         city[newX][newY].robots.push(robot); // Ajouter le robot à la nouvelle position
 
-        // Gérer les actions si le robot rencontre un survivant ou le QG
+        // Gérer les actions a un survivant et est au QG
         if (robot.hasSurvivor && city[newX][newY].qg) {
             robot.hasSurvivor = false; // Déposer le survivant au QG
-        } else if (!robot.hasSurvivor && city[newX][newY].survivant && city[newX][newY].fire) {
-            robot.hasSurvivor = true; // Ramasser un survivant
+            if (city[newX][newY].qg && (city[newX][newY].qg.nbSurvivants + city[newX][newY].qg.nbMort) === city[newX][newY].qg.nbTotalSurvivants) { // Si le robot a atteint le QG et que tout les survivants ont été détecté
+                diffuseRetourQG(city, taille); // Diffuser le message autour du QG
+            }
+        } else if (!robot.hasSurvivor && city[newX][newY].survivant.present && !city[newX][newY].survivant.mort) { 
+            robot.hasSurvivor = true; // Ramasser le survivant
             sendInformation(city); // Envoyer l'information au QG
-            city[newX][newY].survivant = false; // Retirer le survivant de la cellule
+            city[newX][newY].survivant.present = false; // Retirer le survivant de la cellule
+            removeCriSurvivants(city, newX, newY, taille); // Enlever les cris
+
+        } else if (city[newX][newY].survivant.mort) { // Si le robot rencontre un survivant mort
+            sendDeathInformation(city); // Envoyer l'information au QG 
+            removeCriSurvivants(city, newX, newY, taille); // Enlever les cris pour plus que le robot ne se déplace vers un survivant mort
+            city[newX][newY].survivant.present = false; // Retirer le survivant de la cellule
+            city[newX][newY].survivant.mort = false; // Retirer le survivant mort de la cellule
+        }
+        
+        if (city[newX][newY].qg && city[newX][newY].qg.nbSurvivants + city[newX][newY].qg.nbMort === city[newX][newY].qg.nbTotalSurvivants) { // Si le robot a atteint le QG et que tout les survivants ont été sauvés
+            robot.stopped = true;
         }
     }
 }
@@ -242,6 +372,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     let robots = []; // Liste vide pour les robots
     let intervalId; // ID pour gérer l'intervalle de mouvement des robots
     let robotSpeed = 500; // Vitesse des robots en millisecondes
+    let survivorCount = 10; // Nombre initial de survivants
 
     // ================================================================
     // ÉLÉMENTS DU DOM (Interface utilisateur)
@@ -251,6 +382,9 @@ document.addEventListener('DOMContentLoaded', async function () {
     const removeRobotButton = document.getElementById('removeRobot'); // Bouton pour supprimer un robot
     const robotCountDisplay = document.getElementById('robotCount'); // Affichage du nombre de robots
     const robotSpeedInput = document.getElementById('robotSpeedPara'); // Entrée pour ajuster la vitesse des robots
+    const survivorCountInput = document.getElementById('survivorCountInput'); // Entrée pour ajuster le nombre de survivants
+    const startSimulation = document.getElementById('startSimulation'); // Bouton pour démarrer le mouvement des robots
+    const resetButton = document.getElementById('resetSimulation'); // Bouton pour réinitialiser la simulation
 
     // ================================================================
     // LISTENERS POUR LES ÉVÉNEMENTS
@@ -259,7 +393,19 @@ document.addEventListener('DOMContentLoaded', async function () {
     robotSpeedInput.addEventListener('input', function (e) {
         robotSpeed = parseFloat(e.target.value) * 1000; // Convertir la vitesse en millisecondes
         // Réajuster l'intervalle avec la nouvelle vitesse
-        intervalId = startRobotMovement(robots, city, taille, intervalId, grid, cellSize, robotSpeed);
+        if (intervalId) { 
+            clearInterval(intervalId); // Nettoyer l'intervalle existant
+            intervalId = startRobotMovement(robots, city, taille, intervalId, grid, cellSize, robotSpeed); // Redémarrer avec la nouvelle vitesse
+        }
+    });
+
+    // Modifier le nombre de survivants via l'interface
+    survivorCountInput.addEventListener('input', function (e) {
+        survivorCount = parseInt(e.target.value); // Lire la nouvelle valeur de survivant
+        city = initGrid(new Array(taille), taille, survivorCount); // Réinitialiser la grille avec le nouveau nombre de survivants
+        robots = placeRobots(city, taille, robotCount); // Réinitialiser les robots
+        let svgContent = updateGrid(city, taille, cellSize, robots); // Mettre à jour la grille SVG
+        grid.innerHTML = svgContent; // Afficher la grille mise à jour
     });
 
     // Mettre à jour le compteur de robots
@@ -279,7 +425,9 @@ document.addEventListener('DOMContentLoaded', async function () {
             city[mid][mid].robots.push(robot); // Ajouter le robot au QG
             updateRobotCount(); // Mettre à jour le compteur de robots
 
-            intervalId = startRobotMovement(robots, city, taille, intervalId, grid, cellSize, robotSpeed); // Lancer le mouvement des robots
+            //intervalId = startRobotMovement(robots, city, taille, intervalId, grid, cellSize, robotSpeed); // Lancer le mouvement des robots
+            let svgContent = updateGrid(city, taille, cellSize, robots);
+            grid.innerHTML = svgContent; // Mettre à jour la grille avec le nouveau robot
         }
     });
 
@@ -311,10 +459,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                 // Si tous les robots ont été supprimés, arrêter l'intervalle de mouvement des robots
                 if (robots.length === 0) {
                     clearInterval(intervalId);  // Nettoyer l'intervalle
-                } else {
-                    // Si des robots restent, redémarrer l'intervalle pour continuer leur mouvement
-                    intervalId = startRobotMovement(robots, city, taille, intervalId, grid, cellSize, robotSpeed);
-                }
+                } 
 
                 // Log des informations pour le débogage
                 console.log("Robot supprimé :", robot);
@@ -324,18 +469,20 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     });
 
+    // Réinitialiser la simulation
+    resetButton.addEventListener('click', () => { 
+        location.reload(); // Recharger la page pour réinitialiser la simulation
+    });
+
     // ================================================================
     // PARTIE MAIN DU PROGRAMME
     // ================================================================
     // Initialiser la grille de la ville
-    initGrid(city, taille);
+    initGrid(city, taille, survivorCount);
 
     // Placer les robots sur la grille
     robots = placeRobots(city, taille, robotCount);
-
-    // Démarrer le mouvement des robots à intervalles réguliers
-    intervalId = startRobotMovement(robots, city, taille, intervalId, grid, cellSize, robotSpeed);
-
+    
     // Définir les dimensions du SVG pour la grille
     grid.setAttribute('width', taille * cellSize);
     grid.setAttribute('height', taille * cellSize);
@@ -354,8 +501,14 @@ document.addEventListener('DOMContentLoaded', async function () {
     let x = Math.floor(Math.random() * taille);  // Choisir une position aléatoire X
     let y = Math.floor(Math.random() * taille);  // Choisir une position aléatoire Y
     startFire(city, x, y);  // Démarrer un incendie à la position (x, y)
+    startMultipleFires(city, 25); // Démarrer plusieurs incendies aléatoires
 
     // Mettre à jour la grille après avoir allumé le feu
     svgContent = updateGrid(city, taille, cellSize, robots);
     grid.innerHTML = svgContent;  // Afficher la grille mise à jour avec le feu
+    
+    // Démarrer les les robots après avoir cliqué sur le bouton de démarrage
+    startSimulation.addEventListener('click', () => {
+        intervalId = startRobotMovement(robots, city, taille, intervalId, grid, cellSize, robotSpeed);
+    });
 });

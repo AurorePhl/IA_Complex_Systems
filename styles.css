@@ -113,7 +113,13 @@ button {
     margin: 5px;                     /* Ajouter un espacement autour du bouton */
     border: none;                    /* Supprimer les bordures par défaut */
 }
-
+#startSimulation{
+   margin-top: 50px;                /* Ajouter un espacement en haut du bouton */
+}
+#resetSimulation{
+   background-color: grey; 
+   margin-top: 25px;   
+}
 /* ================================================================
    Effet de survol du bouton
    ================================================================ */
@@ -121,7 +127,9 @@ button:hover {
     background-color: darkslategrey; /* Changer la couleur de fond lorsque l'on survole le bouton */
     cursor: pointer;                /* Changer le curseur en pointeur pour indiquer l'interaction */
 }
-
+#resetSimulation:hover {
+   background-color: darkgrey; /* Couleur de fond plus foncée au survol */
+}
 /* ================================================================
    Style pour ajuster la largeur de l'input
    ================================================================ */

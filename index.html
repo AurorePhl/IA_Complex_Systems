@@ -122,6 +122,28 @@
                 <!-- Affichage du texte pour l'unité de la vitesse (secondes) -->
                 <span id="speedDisplay"> secondes</span>
             </div>
+            <!-- Section pour ajuster le nombre de survivants -->
+            <div>
+                <!-- Affichage du texte pour le nombre de survivants -->
+                <div id="survivorCountLabel">Nombre de survivants : </div>
+                <!-- Contrôle pour définir le nombre de survivants (valeur numérique) -->
+                <input type="number" id="survivorCountInput" value="10" min="1">
+            </div>
+            <!-- Section pour démarrer la simulation -->
+            <div>
+                <!-- Bouton pour démarrer la simulation -->
+                <button id="startSimulation">Commencer la simulation</button>
+            </div>
+            <div>
+                <!-- Bouton pour réinitialiser la simulation -->
+                <button id="resetSimulation">Réinitialiser la simulation</button>
+            </div>
+        </div>
+        <!-- Section pour afficher les performances de la simulation -->
+        <div id="performance">
+            <h2>Performances :</h2>
+            <div id="executionTime">Temps d'exécution : <span id="executionTimeValue">0</span> secondes</div>
+            <div id="survivorRate">Taux de survivants sauvés : <span id="survivorRateValue">0</span>%</div>
         </div>
     </div>
 
