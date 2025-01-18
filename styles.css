@@ -136,4 +136,6 @@ button:hover {
 input[type="number"] {
     width: 100px; /* Ajuster la valeur de la largeur de l'input */
 }
-
+#performance {
+    margin-top: 100px; /* Ajouter un espacement en haut du bouton */
+}

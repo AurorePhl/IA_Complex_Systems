@@ -342,11 +342,14 @@ function moveRobot(city, robot, taille) {
     }
 }
 
+
 // Fonction pour démarrer le mouvement des robots
 function startRobotMovement(robots, city, taille, intervalId, grid, cellSize, robotSpeed) {
     if (intervalId) {
         clearInterval(intervalId); // Si un mouvement est déjà en cours, le nettoyer
     }
+    let startTime, endTime;
+    startTime = Date.now(); 
 
     // Créer un nouvel intervalle pour le mouvement des robots
     intervalId = setInterval(() => {
@@ -355,11 +358,32 @@ function startRobotMovement(robots, city, taille, intervalId, grid, cellSize, ro
         });
         let svgContent = updateGrid(city, taille, cellSize, robots); // Mettre à jour la grille SVG
         grid.innerHTML = svgContent; // Afficher la grille mise à jour
+
+        // Vérifier si tous les robots sont rentrés au QG
+        if (robots.every(robot => robot.stopped)) {
+            clearInterval(intervalId); // Arrêter l'intervalle
+            endTime = Date.now(); // Enregistrer le temps de fin de la simulation
+            displayPerformance(city, startTime, endTime); // Afficher les performances
+        }
     }, robotSpeed); // Déplacer les robots à un intervalle de 'robotSpeed' millisecondes
+
 
     return intervalId; // Retourner l'intervalle pour gestion future
 }
 
+// Fonction pour afficher les performances de la simulation
+function displayPerformance(city, startTime, endTime) {
+    const executionTime = (endTime - startTime) / 1000; // Calculer le temps d'exécution en secondes
+    const mid = Math.floor(city.length / 2);
+    const qg = city[mid][mid].qg;
+    const totalSurvivants = qg.totalSurvivants;
+    const totalHumans = qg.totalHumans;
+    const survivorRate = (totalSurvivants / totalHumans) * 100; // Calculer le taux d'humains sauvés
+
+    // Afficher les performances dans le DOM
+    document.getElementById('executionTimeValue').textContent = executionTime.toFixed(2);
+    document.getElementById('survivorRateValue').textContent = survivorRate.toFixed(2);
+}
 // ================================================================
 // LANCEMENT DU PROGRAMME 
 // ================================================================
