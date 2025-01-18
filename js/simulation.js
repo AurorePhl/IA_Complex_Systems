@@ -31,7 +31,7 @@ function initGrid(city, taille, survivorCount) {
     city[mid][mid].qg = {
         nbSurvivants: 0, // Initialisation du nombre de survivants au QG
         nbMort: 0, // Initialisation du nombre de morts au QG
-        nbTotalSurvivants : survivorCount // Nombre total de survivants à sauver
+        nbTotalSurvivants: survivorCount // Nombre total de survivants à sauver
     };
 
     // Placement aléatoire des survivants sur la grille
@@ -85,7 +85,7 @@ function updateGrid(city, taille, cellSize, robots) {
                 color = "#d3d3d3"; // Couleur grisée claire pour les messages de diffusion retour au QG
             }
             // Dessiner un rectangle représentant la cellule
-            svgContent += `<rect x="${j * cellSize}" y="${i * cellSize}" width="${cellSize}" height="${cellSize}" fill="${color}" stroke="black" />`;
+            svgContent += `<rect id="cell-${j}-${i}" x="${j * cellSize}" y="${i * cellSize}" width="${cellSize}" height="${cellSize}" fill="${color}" stroke="black" />`;
             // Dessiner les robots si présents sur la cellule
             if (cell.robots.length > 0) {
                 let positions = getRobotPositions(cellSize, cell.robots.length);
@@ -95,7 +95,7 @@ function updateGrid(city, taille, cellSize, robots) {
                 });
             }
             // Dessiner les survivants si présents et pas morts sur la cellule
-            if (cell.survivant.present ) {
+            if (cell.survivant.present) {
                 let x = j * cellSize + cellSize / 2;
                 let y = i * cellSize + cellSize / 2;
                 let size = cellSize / 4;
@@ -127,6 +127,15 @@ function updateGrid(city, taille, cellSize, robots) {
     return svgContent; // Retourner le contenu SVG mis à jour
 }
 
+// Fonction pour mettre à jour city 
+function updateCity(city){
+    for (let i = 0; i < taille; i++) {
+        for (let j = 0; j < taille; j++) {
+
+        }
+    }
+}
+
 // Fonction pour générer un ID aléatoire pour chaque robot
 function generateRandomId() {
     return Math.random().toString(36).substr(2, 9); // ID alphanumérique unique
@@ -141,7 +150,7 @@ function placeRobots(city, taille, count) {
 
     for (let i = 0; i < count; i++) {
         let color = robotColor[i % robotColor.length]; // Choisir une couleur de robot
-        let robot = { x: mid, y: mid, id: generateRandomId(), color: color, hasSurvivor: false, stopped: false  }; // Créer un robot avec ses attributs
+        let robot = { x: mid, y: mid, id: generateRandomId(), color: color, hasSurvivor: false, stopped: false }; // Créer un robot avec ses attributs
 
         city[mid][mid].robots.push(robot); // Ajouter le robot au QG
         robots.push(robot); // Ajouter à la liste des robots
@@ -157,6 +166,7 @@ function placeRobots(city, taille, count) {
 function startFire(city, x, y) {
     if (x >= 0 && x < city.length && y >= 0 && y < city[x].length) {
         city[x][y].fire = true; // Allumer un feu sur la cellule spécifiée
+        console.log(city[x][y].fire);
         checkSurvivorDeath(city, x, y);
     }
 }
@@ -279,7 +289,7 @@ function addCriSurvivants(city, x, y, taille) {
 // Fonction pour déplacer un robot à une position voisine
 function moveRobot(city, robot, taille) {
     if (robot.stopped) return;  // Arrêter le robot s'il a déjà atteint le QG et que tout les survivants on été sauvés
-    
+
     let direction;
     if (robot.hasSurvivor) { // Si le robot a un survivant
         direction = getDirectionToQG(city, robot); // Trouver la direction vers le QG
@@ -290,9 +300,9 @@ function moveRobot(city, robot, taille) {
             dy: Math.sign(cri.y - robot.y)
         };
     } else if (city[robot.x][robot.y].messageRetourQG) { // Si un message est entendu
-            direction = getDirectionToQG(city, robot); // Trouver la direction vers le QG
+        direction = getDirectionToQG(city, robot); // Trouver la direction vers le QG
     } else { // Si aucune information n'est disponible
-        const directions = [ 
+        const directions = [
             { dx: 0, dy: -1 }, // Haut
             { dx: 0, dy: 1 },  // Bas
             { dx: -1, dy: 0 }, // Gauche
@@ -319,7 +329,7 @@ function moveRobot(city, robot, taille) {
             if (city[newX][newY].qg && (city[newX][newY].qg.nbSurvivants + city[newX][newY].qg.nbMort) === city[newX][newY].qg.nbTotalSurvivants) { // Si le robot a atteint le QG et que tout les survivants ont été détecté
                 diffuseRetourQG(city, taille); // Diffuser le message autour du QG
             }
-        } else if (!robot.hasSurvivor && city[newX][newY].survivant.present && !city[newX][newY].survivant.mort) { 
+        } else if (!robot.hasSurvivor && city[newX][newY].survivant.present && !city[newX][newY].survivant.mort) {
             robot.hasSurvivor = true; // Ramasser le survivant
             sendInformation(city); // Envoyer l'information au QG
             city[newX][newY].survivant.present = false; // Retirer le survivant de la cellule
@@ -331,7 +341,7 @@ function moveRobot(city, robot, taille) {
             city[newX][newY].survivant.present = false; // Retirer le survivant de la cellule
             city[newX][newY].survivant.mort = false; // Retirer le survivant mort de la cellule
         }
-        
+
         if (city[newX][newY].qg && city[newX][newY].qg.nbSurvivants + city[newX][newY].qg.nbMort === city[newX][newY].qg.nbTotalSurvivants) { // Si le robot a atteint le QG et que tout les survivants ont été sauvés
             robot.stopped = true;
         }
@@ -356,21 +366,92 @@ function startRobotMovement(robots, city, taille, intervalId, grid, cellSize, ro
     return intervalId; // Retourner l'intervalle pour gestion future
 }
 
+// Propagation d'un feu d'une cellule
+function propagateFire(city, x, y, taille) {
+    const directions = [
+        [0, 1], // Droite
+        [0, -1], // Gauche
+        [1, 0], // Bas
+        [-1, 0], // Haut
+    ];
+
+    directions.forEach(([dx, dy]) => {
+        const nx = x + dx;
+        const ny = y + dy;
+
+        if (nx >= 0 && nx < taille && ny >= 0 && ny < taille && !city[nx][ny].fire && !city[nx][ny].qg) {
+            // await sleep(2000); // Délai de propagation en ms 
+            startFire(city, nx, ny);
+        }
+    });
+
+    let svgContent = updateGrid(city, taille, cellSize, robots); // Mettre à jour la grille SVG
+    grid.innerHTML = svgContent; // Afficher la grille mise à jour
+}
+
+// Fonction pour récupérer un rect par son ID
+function getRectById(rectId) {
+    let grid = document.getElementById('grid'); // Grille où les robots seront affichés
+    if (!grid) {
+        console.error('Le conteneur SVG est introuvable.');
+        return null;
+    }
+    // Récupérer le rect avec son ID à partir du conteneur
+    const rect = grid.querySelector(`#${rectId}`);
+    if (!rect) {
+        console.warn(`Aucun rect trouvé avec l'id : ${rectId}`);
+    }
+
+    return rect;
+}
+
+function startFirePropagation(city, taille, grid, cellSize, firePropagationIntervalId) {
+    if (firePropagationIntervalId) {
+        clearInterval(firePropagationIntervalId); // Nettoyer le précédent intervalle
+    }
+
+    firePropagationIntervalId = setInterval(() => {
+        const updatedRects = document.querySelectorAll('rect');
+        updatedRects.forEach((rect) => {
+            const x = parseInt(rect.getAttribute('x') / cellSize);
+            const y = parseInt(rect.getAttribute('y') / cellSize);
+            if (rect.getAttribute('class') === "isFlammable" && !city[x][y].fire) {
+                startFire(city, y, x);
+                console.log("Feu sur :", x, y);
+                // Mettre à jour la grille après avoir allumé le feu
+                svgContent = updateGrid(city, taille, cellSize, robots);
+                grid.innerHTML = svgContent;  // Afficher la grille mise à jour avec le feu
+            }
+        });
+    }, 100); // Propage le feu à chaque itération
+
+    return firePropagationIntervalId;
+}
+
+
+// ================================================================
+// VARIABLES GLOBALES 
+// ================================================================
+let city; 
+let taille;
+let cellSize;
+let robots
+
 // ================================================================
 // LANCEMENT DU PROGRAMME 
 // ================================================================
-
 // Attendre que la page soit entièrement chargée avant d'exécuter le programme
 document.addEventListener('DOMContentLoaded', async function () {
     // ================================================================
     // VARIABLES D'INITIATION
     // ================================================================
-    let taille = 15; // Taille de la grille (15x15)
-    let cellSize = 50; // Taille de chaque cellule
-    let city = new Array(taille); // Initialisation de la grille
+    taille = 15; // Taille de la grille (15x15)
+    cellSize = 50; // Taille de chaque cellule
+    city = new Array(taille); // Initialisation de la grille
     let robotCount = 7; // Nombre initial de robots
-    let robots = []; // Liste vide pour les robots
+    robots = []; // Liste vide pour les robots
     let intervalId; // ID pour gérer l'intervalle de mouvement des robots
+    let firePropagationIntervalId;
     let robotSpeed = 500; // Vitesse des robots en millisecondes
     let survivorCount = 10; // Nombre initial de survivants
     let totalSurvivants = 0;  // Nombre total de survivants
@@ -400,7 +481,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     robotSpeedInput.addEventListener('input', function (e) {
         robotSpeed = parseFloat(e.target.value) * 1000; // Convertir la vitesse en millisecondes
         // Réajuster l'intervalle avec la nouvelle vitesse
-        if (intervalId) { 
+        if (intervalId) {
             clearInterval(intervalId); // Nettoyer l'intervalle existant
             intervalId = startRobotMovement(robots, city, taille, intervalId, grid, cellSize, robotSpeed); // Redémarrer avec la nouvelle vitesse
         }
@@ -498,7 +579,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                 // Si tous les robots ont été supprimés, arrêter l'intervalle de mouvement des robots
                 if (robots.length === 0) {
                     clearInterval(intervalId);  // Nettoyer l'intervalle
-                } 
+                }
 
                 // Log des informations pour le débogage
                 console.log("Robot supprimé :", robot);
@@ -509,7 +590,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     });
 
     // Réinitialiser la simulation
-    resetButton.addEventListener('click', () => { 
+    resetButton.addEventListener('click', () => {
         location.reload(); // Recharger la page pour réinitialiser la simulation
     });
 
@@ -521,7 +602,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     // Placer les robots sur la grille
     robots = placeRobots(city, taille, robotCount);
-    
+
     // Définir les dimensions du SVG pour la grille
     grid.setAttribute('width', taille * cellSize);
     grid.setAttribute('height', taille * cellSize);
@@ -537,22 +618,41 @@ document.addEventListener('DOMContentLoaded', async function () {
     updateHumansCount();
 
     // Ajouter un délai de 2 secondes avant de démarrer un incendie
-    await sleep(2000);
+    // await sleep(2000);
 
     // Allumer un feu à une position aléatoire et mettre à jour la grille
-    let x = Math.floor(Math.random() * taille);  // Choisir une position aléatoire X
-    let y = Math.floor(Math.random() * taille);  // Choisir une position aléatoire Y
-    startFire(city, x, y);  // Démarrer un incendie à la position (x, y)
-    startMultipleFires(city, 25); // Démarrer plusieurs incendies aléatoires
+    // let x = Math.floor(Math.random() * taille);  // Choisir une position aléatoire X
+    // let y = Math.floor(Math.random() * taille);  // Choisir une position aléatoire Y
+    // startFire(city, x, y);  // Démarrer un incendie à la position (x, y)
+    // startMultipleFires(city, 25); // Démarrer plusieurs incendies aléatoires
 
-    // Mettre à jour la grille après avoir allumé le feu
-    svgContent = updateGrid(city, taille, cellSize, robots);
-    grid.innerHTML = svgContent;  // Afficher la grille mise à jour avec le feu
     
+
     // Démarrer les les robots après avoir cliqué sur le bouton de démarrage
     startSimulation.addEventListener('click', () => {
         intervalId = startRobotMovement(robots, city, taille, intervalId, grid, cellSize, robotSpeed);
+        firePropagationIntervalId = startFirePropagation(city,taille,grid,cellSize,firePropagationIntervalId);
     });
 
     updateHumansCount();
+
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+const grid = document.getElementById('grid'); // Grille où les robots seront affichés
+const allRects = document.querySelectorAll('rect'); // Balises <rect> dans le DOM
+
+// Démarrer un feu 
+allRects.forEach((rect) => {
+    if (rect.id && rect.id!="cell-7-7") {
+        rect.addEventListener('click', function () {
+            if(rect.getAttribute('class')!="isFlammable"){
+                console.log(`Cellule cliquée : id=${rect.id}`);
+                rect.setAttribute('class', 'isFlammable'); // Rend la cellule inflammable
+                rect.setAttribute('fill', 'red'); // Change la couleur de la cellule en temps réel
+            } 
+        });
+    }
+});
+
 });
