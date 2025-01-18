@@ -150,7 +150,7 @@ function placeRobots(city, taille, count) {
 
     for (let i = 0; i < count; i++) {
         let color = robotColor[i % robotColor.length]; // Choisir une couleur de robot
-        let robot = { x: mid, y: mid, id: generateRandomId(), color: color, hasHuman: false, stopped: false  }; // Créer un robot avec ses attributs
+        let robot = { x: mid, y: mid, id: generateRandomId(), color: color, hasHuman: false, stopped: false, epuise :false }; // Créer un robot avec ses attributs
 
         city[mid][mid].robots.push(robot); // Ajouter le robot au QG
         robots.push(robot); // Ajouter à la liste des robots
@@ -223,7 +223,7 @@ function checkSurvivorDeath(city, x, y) { // Vérifier si un humain est mort
                 city[x][y].human.mort = true; // Marquer l'humain comme mort
                 console.log(`human à (${x}, ${y}) est mort.`);
             }
-        }, 1000); // Vérifier après 1 seconde sur la case en feu
+        }, 10000); // Vérifier après 10 seconde sur la case en feu 
     }
 }
 function diffuseRetourQG(city, taille) {
@@ -233,10 +233,6 @@ function diffuseRetourQG(city, taille) {
         { dx: 0, dy: 1 },  // Bas
         { dx: -1, dy: 0 }, // Gauche
         { dx: 1, dy: 0 },  // Droite
-        { dx: -1, dy: -1 }, // Haut-Gauche
-        { dx: 1, dy: -1 },  // Haut-Droite
-        { dx: -1, dy: 1 },  // Bas-Gauche
-        { dx: 1, dy: 1 }    // Bas-Droite
     ];
 
     directions.forEach(direction => {
@@ -291,7 +287,7 @@ function moveRobot(city, robot, taille) {
     if (robot.stopped) return;  // Arrêter le robot s'il a déjà atteint le QG et que tout les humains on été détecté
     
     let direction;
-    if (robot.hasHuman) { // Si le robot a un humain
+    if (robot.hasHuman || (robot.epuise && !robot.hasHuman) ) { // Si le robot a un humain ou est épuisé
         direction = getDirectionToQG(city, robot); // Trouver la direction vers le QG
     } else if (city[robot.x][robot.y].cri) { // Si un cri est entendu
         let cri = city[robot.x][robot.y].cri; // Récupérer la position de l'humain
@@ -322,6 +318,20 @@ function moveRobot(city, robot, taille) {
         robot.y = newY;
 
         city[newX][newY].robots.push(robot); // Ajouter le robot à la nouvelle position
+        
+
+        if (city[newX][newY].fire) { // Si le robot rencontre un feu
+            // Arrêter le robot pendant trois secondes
+            robot.stopped = true;
+            robot.epuise = true; // Le robot est épuisé
+            setTimeout(() => {
+                // Éteindre le feu sur la case après trois secondes (1 seconde de chargement et 2 secondes d'extinction)
+                city[newX][newY].fire = false;
+                robot.stopped = false;
+                let svgContent = updateGrid(city, taille, cellSize, robots); // Mettre à jour la grille SVG
+                grid.innerHTML = svgContent;
+            }, 3000);
+        }
 
         // Gérer les actions a un humain et est au QG
         if (robot.hasHuman && city[newX][newY].qg) {
@@ -344,6 +354,14 @@ function moveRobot(city, robot, taille) {
             if ((city[mid][mid].qg.totalSurvivants + city[mid][mid].qg.totalMorts) === city[mid][mid].qg.totalHumans) { // Si le robot a détecté un mort et que c'est le dernier humain à détecter
                 diffuseRetourQG(city, taille); // Diffuser le message autour du QG
             }
+        }
+        // Si le robot est épuisé et atteint le QG, il doit se recharger
+        if (robot.epuise && city[newX][newY].qg) {
+            robot.stopped = true; // Arrêter le robot pendant qu'il se recharge
+            setTimeout(() => {
+                robot.epuise = false; // Recharger le robot après 2 secondes
+                robot.stopped = false; // Permettre au robot de repartir
+            }, 2000);
         }
         
         if (city[newX][newY].qg && city[newX][newY].qg.totalSurvivants + city[newX][newY].qg.totalMorts === city[newX][newY].qg.totalHumans) { // Si le robot a atteint le QG et que tout les survivants ont été sauvés
