@@ -85,7 +85,7 @@ function updateGrid(city, taille, cellSize, robots) {
                 color = "#d3d3d3"; // Couleur grisée claire pour les messages de diffusion retour au QG
             }
             // Dessiner un rectangle représentant la cellule
-            svgContent += `<rect id="cell-${j}-${i}" x="${j * cellSize}" y="${i * cellSize}" width="${cellSize}" height="${cellSize}" fill="${color}" stroke="black" />`;
+            svgContent += `<rect id="cell-${j}-${i}" class="isNotFlammable" x="${j * cellSize}" y="${i * cellSize}" width="${cellSize}" height="${cellSize}" fill="${color}" stroke="black" />`;
             // Dessiner les robots si présents sur la cellule
             if (cell.robots.length > 0) {
                 let positions = getRobotPositions(cellSize, cell.robots.length);
@@ -673,6 +673,9 @@ const allRects = document.querySelectorAll('rect'); // Balises <rect> dans le DO
 
 // Démarrer un feu 
 allRects.forEach((rect) => {
+    if (rect.id=="cell-7-7") {
+        rect.setAttribute('class', 'qg'); 
+    }
     if (rect.id && rect.id!="cell-7-7") {
         rect.addEventListener('click', function () {
             if(rect.getAttribute('class')!="isFlammable"){
