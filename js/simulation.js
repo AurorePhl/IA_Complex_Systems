@@ -437,6 +437,7 @@ function startFirePropagation(city, taille, grid, cellSize, firePropagationInter
                 svgContent = updateGrid(city, taille, cellSize, robots);
                 grid.innerHTML = svgContent;  // Afficher la grille mise à jour avec le feu
             }
+            rect.setAttribute('class','startSimulation');
         });
     }, 100); // Propage le feu à chaque itération
 
