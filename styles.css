@@ -139,3 +139,7 @@ input[type="number"] {
 #performance {
     margin-top: 100px; /* Ajouter un espacement en haut du bouton */
 }
+
+.isFlammable:hover {
+   cursor:pointer;
+}

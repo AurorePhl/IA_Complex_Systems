@@ -29,15 +29,9 @@ function initGrid(city, taille, humanCount) {
     // Positionner le quartier général (QG) au centre de la grille
     let mid = Math.floor(taille / 2);
     city[mid][mid].qg = {
-<<<<<<< HEAD
-        nbSurvivants: 0, // Initialisation du nombre de survivants au QG
-        nbMort: 0, // Initialisation du nombre de morts au QG
-        nbTotalSurvivants: survivorCount // Nombre total de survivants à sauver
-=======
         totalSurvivants: 0, // Initialisation du nombre de survivants au QG
         totalMorts: 0, // Initialisation du nombre de morts au QG
         totalHumans : humanCount // Nombre total d'humains à sauver
->>>>>>> dd7ee539553e40e1875259502a0a517f7b3b4a88
     };
 
     // Placement aléatoire des humains sur la grille
@@ -100,13 +94,8 @@ function updateGrid(city, taille, cellSize, robots) {
                     svgContent += `<circle cx="${j * cellSize + pos.cx}" cy="${i * cellSize + pos.cy}" r="${cellSize / 8}" fill="${robot.color}" />`;
                 });
             }
-<<<<<<< HEAD
-            // Dessiner les survivants si présents et pas morts sur la cellule
-            if (cell.survivant.present) {
-=======
             // Dessiner les humains si présents et pas morts sur la cellule
             if (cell.human.present ) {
->>>>>>> dd7ee539553e40e1875259502a0a517f7b3b4a88
                 let x = j * cellSize + cellSize / 2;
                 let y = i * cellSize + cellSize / 2;
                 let size = cellSize / 4;
@@ -161,11 +150,7 @@ function placeRobots(city, taille, count) {
 
     for (let i = 0; i < count; i++) {
         let color = robotColor[i % robotColor.length]; // Choisir une couleur de robot
-<<<<<<< HEAD
-        let robot = { x: mid, y: mid, id: generateRandomId(), color: color, hasSurvivor: false, stopped: false }; // Créer un robot avec ses attributs
-=======
         let robot = { x: mid, y: mid, id: generateRandomId(), color: color, hasHuman: false, stopped: false  }; // Créer un robot avec ses attributs
->>>>>>> dd7ee539553e40e1875259502a0a517f7b3b4a88
 
         city[mid][mid].robots.push(robot); // Ajouter le robot au QG
         robots.push(robot); // Ajouter à la liste des robots
@@ -303,13 +288,8 @@ function addCriHumans(city, x, y, taille) {
 
 // Fonction pour déplacer un robot à une position voisine
 function moveRobot(city, robot, taille) {
-<<<<<<< HEAD
-    if (robot.stopped) return;  // Arrêter le robot s'il a déjà atteint le QG et que tout les survivants on été sauvés
-
-=======
     if (robot.stopped) return;  // Arrêter le robot s'il a déjà atteint le QG et que tout les humains on été détecté
     
->>>>>>> dd7ee539553e40e1875259502a0a517f7b3b4a88
     let direction;
     if (robot.hasHuman) { // Si le robot a un humain
         direction = getDirectionToQG(city, robot); // Trouver la direction vers le QG
@@ -349,13 +329,8 @@ function moveRobot(city, robot, taille) {
             if (city[newX][newY].qg && (city[newX][newY].qg.totalSurvivants + city[newX][newY].qg.totalMorts) === city[newX][newY].qg.totalHumans) { // Si le robot a atteint le QG et que tout les humains ont été détecté
                 diffuseRetourQG(city, taille); // Diffuser le message autour du QG
             }
-<<<<<<< HEAD
-        } else if (!robot.hasSurvivor && city[newX][newY].survivant.present && !city[newX][newY].survivant.mort) {
-            robot.hasSurvivor = true; // Ramasser le survivant
-=======
         } else if (!robot.hasHuman && city[newX][newY].human.present && !city[newX][newY].human.mort) { 
             robot.hasHuman = true; // Ramasser l'humain
->>>>>>> dd7ee539553e40e1875259502a0a517f7b3b4a88
             sendInformation(city); // Envoyer l'information au QG
             city[newX][newY].human.present = false; // Retirer l'humain de la cellule
             removeCriHumans(city, newX, newY, taille); // Enlever les cris
@@ -370,13 +345,8 @@ function moveRobot(city, robot, taille) {
                 diffuseRetourQG(city, taille); // Diffuser le message autour du QG
             }
         }
-<<<<<<< HEAD
-
-        if (city[newX][newY].qg && city[newX][newY].qg.nbSurvivants + city[newX][newY].qg.nbMort === city[newX][newY].qg.nbTotalSurvivants) { // Si le robot a atteint le QG et que tout les survivants ont été sauvés
-=======
         
         if (city[newX][newY].qg && city[newX][newY].qg.totalSurvivants + city[newX][newY].qg.totalMorts === city[newX][newY].qg.totalHumans) { // Si le robot a atteint le QG et que tout les survivants ont été sauvés
->>>>>>> dd7ee539553e40e1875259502a0a517f7b3b4a88
             robot.stopped = true;
         }
     }
@@ -411,7 +381,6 @@ function startRobotMovement(robots, city, taille, intervalId, grid, cellSize, ro
     return intervalId; // Retourner l'intervalle pour gestion future
 }
 
-<<<<<<< HEAD
 // Propagation d'un feu d'une cellule
 function propagateFire(city, x, y, taille) {
     const directions = [
@@ -474,16 +443,6 @@ function startFirePropagation(city, taille, grid, cellSize, firePropagationInter
     return firePropagationIntervalId;
 }
 
-
-// ================================================================
-// VARIABLES GLOBALES 
-// ================================================================
-let city; 
-let taille;
-let cellSize;
-let robots
-
-=======
 // Fonction pour afficher les performances de la simulation
 function displayPerformance(city, startTime, endTime) {
     const executionTime = (endTime - startTime) / 1000; // Calculer le temps d'exécution en secondes
@@ -497,7 +456,17 @@ function displayPerformance(city, startTime, endTime) {
     document.getElementById('executionTimeValue').textContent = executionTime.toFixed(2);
     document.getElementById('survivorRateValue').textContent = survivorRate.toFixed(2);
 }
->>>>>>> dd7ee539553e40e1875259502a0a517f7b3b4a88
+
+
+// ================================================================
+// VARIABLES GLOBALES 
+// ================================================================
+let city; 
+let taille;
+let cellSize;
+let robots
+
+
 // ================================================================
 // LANCEMENT DU PROGRAMME 
 // ================================================================
@@ -695,12 +664,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         firePropagationIntervalId = startFirePropagation(city,taille,grid,cellSize,firePropagationIntervalId);
     });
 
-<<<<<<< HEAD
-    updateHumansCount();
-
-=======
     // updateHumansCount();
->>>>>>> dd7ee539553e40e1875259502a0a517f7b3b4a88
 });
 
 document.addEventListener('DOMContentLoaded', () => {
