@@ -9,8 +9,8 @@
 // ================================================================
 
 // Démarre les workers au lancement de la simulation 
-function startSimulation() {
-
+function startSimulation(robotWorker,fireWorker) {
+    // postMessage , timeout, interval, onmessage,...
 }
 
 // Nettoie les workers à la fin de la simulation
