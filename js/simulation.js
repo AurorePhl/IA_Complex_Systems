@@ -541,7 +541,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     let startFireSimulationIntervalId; // ID pour gérer l'intervalle de début des feux au lancement de la simulation
     let firePropagationId; // ID pour gérer l'intervalle de propagation des feux 
     let robotSpeed = 500; // Vitesse des robots en millisecondes
-    let fireSpeed = 2000; // Vitesse de propagation des feux en millisecondes
+    let fireSpeed = 10000; // Vitesse de propagation des feux en millisecondes
     let humanCount = 10; // Nombre initial de survivants
     let totalSurvivants = 0;  // Nombre total de survivants
     let totalHumans = 0;  // Nombre total d'humains
