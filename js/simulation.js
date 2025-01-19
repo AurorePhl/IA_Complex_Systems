@@ -567,8 +567,8 @@ document.addEventListener('DOMContentLoaded', async function () {
     // ================================================================
     // ÉLÉMENTS DU DOM (Interface utilisateur)
     // ================================================================
-    const robotWorker = new Worker('robotWorker.js'); // Web Worker pour le déplacement des robots
-    const fireWorker = new Worker('fireWorker.js'); // Web Worker pour la propagation des incendies 
+    // const robotWorker = new Worker('/js/robotWorker.js'); // Web Worker pour le déplacement des robots
+    // const fireWorker = new Worker('/js/fireWorker.js'); // Web Worker pour la propagation des incendies 
     const grid = document.getElementById('grid'); // Grille où les robots seront affichés
     const addRobotButton = document.getElementById('addRobot'); // Bouton pour ajouter un robot
     const removeRobotButton = document.getElementById('removeRobot'); // Bouton pour supprimer un robot
