@@ -43,7 +43,8 @@ function initGrid(city, taille, humanCount) {
     city[mid][mid].qg = {
         totalSurvivants: 0, // Initialisation du nombre de survivants au QG
         totalMorts: 0, // Initialisation du nombre de morts au QG
-        totalHumans : humanCount // Nombre total d'humains à sauver
+        totalHumans : humanCount, // Nombre total d'humains à sauver
+        PosGlobal : [] // Positions ou il n'y a pas d'humains 
     };
 
     // Placement aléatoire des humains sur la grille
@@ -103,9 +104,22 @@ function updateGrid(city, taille, cellSize, robots) {
                 let positions = getRobotPositions(cellSize, cell.robots.length);
                 cell.robots.forEach((robot, index) => {
                     let pos = positions[index];
+                    console.log("Robot", robot.color, "à la position", i, j);
                     svgContent += `<circle cx="${j * cellSize + pos.cx}" cy="${i * cellSize + pos.cy}" r="${cellSize / 8}" fill="${robot.color}" />`;
                 });
             }
+            // if (cell.qg && cell.qg.PosGlobal) {
+            //     cell.qg.PosGlobal.forEach(pos => {
+            //         if (pos.x >= 0 && pos.x < taille && pos.y >= 0 && pos.y < taille) { // Vérifier les limites
+            //             console.log("Position sans humain à la position a dessiner", pos.x, pos.y);
+            //             let rectX = pos.y * cellSize; // Positionnement du rectangle
+            //             let rectY = pos.x * cellSize;
+            //             let rectSize = cellSize / 2; // Taille du petit rectangle
+            //             console.log(`Dessin du rectangle rouge à la position: x=${rectX}, y=${rectY}`);
+            //             svgContent += `<rect x="${rectX}" y="${rectY}" width="${rectSize}" height="${rectSize}" fill="red" stroke="none" />`;
+            //         }
+            //     });
+            // }
             // Dessiner les humains si présents et pas morts sur la cellule
             if (cell.human.present ) {
                 let x = j * cellSize + cellSize / 2;
@@ -163,7 +177,7 @@ function placeRobots(city, taille, count) {
     for (let i = 0; i < count; i++) { // Pour chaque robot
         let color = robotColor[i % robotColor.length]; // Choisir une couleur de robot
         let role = i < 4 ? 'sauveur' : 'pompier';
-        let robot = { x: mid, y: mid, id: generateRandomId(), color: color, hasHuman: false, stopped: false, epuise :false, role: role }; // Créer un robot avec ses attributs
+        let robot = { x: mid, y: mid, id: generateRandomId(), color: color, hasHuman: false, stopped: false, epuise :false, role: role, PosLocal : [] }; // Créer un robot avec ses attributs
         city[mid][mid].robots.push(robot); // Ajouter le robot au QG
         robots.push(robot); // Ajouter à la liste des robots
 
@@ -333,12 +347,24 @@ function determineDirection(city, robot) {
         return getDirectionToQG(city, robot); // Retourner la direction vers le QG
     } else { // Sinon, choisir une direction aléatoire
         const directions = [
-            { dx: 0, dy: -1 },
-            { dx: 0, dy: 1 },
-            { dx: -1, dy: 0 },
-            { dx: 1, dy: 0 }
+            { dx: 0, dy: -1 }, // Haut
+            { dx: 0, dy: 1 },  // Bas
+            { dx: -1, dy: 0 }, // Gauche
+            { dx: 1, dy: 0 }   // Droite
         ];
-        return directions[Math.floor(Math.random() * directions.length)]; // Choisir une direction aléatoire
+        const validDirections = directions.filter(direction => { // Filtrer les directions prioritaires 
+            const newX = robot.x + direction.dx; // Calculer la nouvelle position
+            const newY = robot.y + direction.dy; // Calculer la nouvelle position
+            return isValidPosition(newX, newY, city.length) && !robot.PosLocal.some(pos => pos.x === newX && pos.y === newY); // Vérifier si la position est valide et n'est pas déjà visitée
+        });
+
+        // Si il y a des directions prioritairs, en choisir une aléatoirement
+        if (validDirections.length > 0) { 
+            return validDirections[Math.floor(Math.random() * validDirections.length)];
+        }
+
+        // Si toutes les directions sont dans PosLocal, choisir une direction aléatoire
+        return directions[Math.floor(Math.random() * directions.length)];
     }
 }
 
@@ -374,6 +400,7 @@ function pompierAction(city, robot, newX, newY) { // Gérer l'interaction avec l
 }
 
 function humanAction(city, robot, newX, newY, taille) { // Gérer l'interaction avec les humains
+    
     if (robot.hasHuman && city[newX][newY].qg) { // Si le robot a un humain et est au QG
         robot.hasHuman = false; // Lâcher l'humain
     } else if (!robot.hasHuman && city[newX][newY].human.present && !city[newX][newY].human.mort) { // Si le robot n'a pas d'humain et qu'un humain est présent et non mort
@@ -394,6 +421,28 @@ function humanAction(city, robot, newX, newY, taille) { // Gérer l'interaction 
         if (city[mid][mid].qg.totalSurvivants + city[mid][mid].qg.totalMorts === city[mid][mid].qg.totalHumans) { 
             diffuseRetourQG(city, taille);
         }   
+    } else  if (city[newX][newY].human.present === false) { // si il n'y a pas d'humain
+        const positionExists = robot.PosLocal.some(pos => pos.x === newX && pos.y === newY); // Vérifier si la position existe déjà en local
+        if (!positionExists) { // Si la position n'existe pas
+            robot.PosLocal.push({ x: newX, y: newY }); // Ajouter la position à PosLocal
+        }
+        let mid = Math.floor(city.length / 2); // Récupérer la position du QG
+        const qg = city[mid][mid].qg; // Récupérer le QG
+        const positionExistsInQG = qg.PosGlobal.some(pos => pos.x === newX && pos.y === newY); // Vérifier si la position existe déjà en global
+        if (!positionExistsInQG) {  // Si la position n'existe pas
+            qg.PosGlobal.push({ x: newX, y: newY }); // Ajouter la position à PosGlobal
+            console.log(`Position ajoutée à PosGlobal: x=${newX}, y=${newY}`); // Afficher la position ajoutée
+        }
+        console.log("Position ajoutée à PosGlobal: x=", newX, "y=", newY);
+        console.log("Position ajoutée à PosLocal: x=", newX, "y=", newY);
+        console.log("PosGlobal:" , qg.PosGlobal);
+    }
+    // Si le robot est au QG, transférer PosGlobal à PosLocal
+    const mid = Math.floor(city.length / 2); // Récupérer la position du QG
+    if (city[newX][newY].qg) { // Si le robot est au QG
+        const qg = city[mid][mid].qg; // Récupérer le QG
+        robot.PosLocal = [...qg.PosGlobal]; // Copier les valeurs de PosGlobal dans PosLocal
+        console.log("PosLocal mis à jour avec PosGlobal:", robot.PosLocal);
     }
 }
 
@@ -536,8 +585,6 @@ function getRectById(rectId) {
 
     return rect;
 }
-
-
 
 function startFirePropagation(city, taille, grid, cellSize, startFireSimulationIntervalId) {
     if (startFireSimulationIntervalId) {
