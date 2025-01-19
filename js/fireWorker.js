@@ -4,6 +4,10 @@
 // AUTEURES : DURET Laura et PHILIPPE Aurore
 // ================================================================
 
+// ================================================================
+// EXEMPLE DE FIRE WORKER
+// ================================================================
+
 self.onmessage = function (event) {
     const { city, fireCells, taille } = event.data;
     const updatedFireCells = propagateFire(city, fireCells, taille);

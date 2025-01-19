@@ -4,6 +4,9 @@
 // AUTEURES : DURET Laura et PHILIPPE Aurore
 // ================================================================
 
+// ================================================================
+// EXEMPLE DE ROBOT WORKER
+// ================================================================
 self.onmessage = function (event) {
     const { city, robots, taille } = event.data;
     const updatedRobots = robots.map(robot => moveRobot(city, robot, taille));
