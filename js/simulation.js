@@ -9,16 +9,16 @@
 // ================================================================
 
 // Démarre les workers au lancement de la simulation 
-function startSimulation(robotWorker,fireWorker) {
-    // postMessage , timeout, interval, onmessage,...
-}
+// function startSimulation(robotWorker,fireWorker) {
+//     postMessage , timeout, interval, onmessage,...
+// }
 
 // Nettoie les workers à la fin de la simulation
-function stopSimulation(robotWorker,fireWorker) {
-    robotWorker.terminate(); // Nettoie le worker qui gère le mouvement des robots
-    fireWorker.terminate(); // Nettoie le worker qui gère la propagation des incendies
-    console.log("Simulation terminée."); // Message de fin de simulation envoyé dans la console 
-}
+// function stopSimulation(robotWorker,fireWorker) {
+//     robotWorker.terminate(); // Nettoie le worker qui gère le mouvement des robots
+//     fireWorker.terminate(); // Nettoie le worker qui gère la propagation des incendies
+//     console.log("Simulation terminée."); // Message de fin de simulation envoyé dans la console 
+// }
 
 // Fonction d'initialisation de la grille de la ville
 // Crée une grille carrée de taille 'taille' avec des cases initialisées à des valeurs par défaut
