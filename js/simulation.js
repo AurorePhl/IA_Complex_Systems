@@ -14,7 +14,7 @@ function startSimulation() {
 }
 
 // Nettoie les workers à la fin de la simulation
-function stopSimulation() {
+function stopSimulation(robotWorker,fireWorker) {
     robotWorker.terminate(); // Nettoie le worker qui gère le mouvement des robots
     fireWorker.terminate(); // Nettoie le worker qui gère la propagation des incendies
     console.log("Simulation terminée."); // Message de fin de simulation envoyé dans la console 
