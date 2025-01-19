@@ -372,7 +372,7 @@ function moveRobot(city, robot, taille) {
 
 
 // Fonction pour démarrer le mouvement des robots
-function startRobotMovement(robots, city, taille, intervalId, grid, cellSize, robotSpeed) {
+function startRobotMovement(robots, city, taille, intervalId, grid, cellSize, robotSpeed, gridLock) {
     if (intervalId) {
         clearInterval(intervalId); // Si un mouvement est déjà en cours, le nettoyer
     }
@@ -382,7 +382,11 @@ function startRobotMovement(robots, city, taille, intervalId, grid, cellSize, ro
     // Créer un nouvel intervalle pour le mouvement des robots
     intervalId = setInterval(() => {
         robots.forEach(robot => {
-            moveRobot(city, robot, taille); // Déplacer chaque robot
+            if (!gridLock) {
+                gridLock = true;
+                moveRobot(city, robot, taille); // Déplacer chaque robot
+                gridLock = false;
+            }
         });
         let svgContent = updateGrid(city, taille, cellSize, robots); // Mettre à jour la grille SVG
         grid.innerHTML = svgContent; // Afficher la grille mise à jour
@@ -413,13 +417,47 @@ function propagateFire(city, x, y, taille) {
         const ny = y + dy;
 
         if (nx >= 0 && nx < taille && ny >= 0 && ny < taille && !city[nx][ny].fire && !city[nx][ny].qg) {
-            // await sleep(2000); // Délai de propagation en ms 
             startFire(city, nx, ny);
         }
     });
 
     let svgContent = updateGrid(city, taille, cellSize, robots); // Mettre à jour la grille SVG
     grid.innerHTML = svgContent; // Afficher la grille mise à jour
+}
+
+// Mettre à jour l'intervalle de propagation des feux 
+function propagateFireInterval(city,taille,grid,cellSize,robots,fireSpeed,firePropagationId, gridLock) {
+    if (firePropagationId) {
+        clearInterval(firePropagationId); // Si une propagation est déjà en cours, nettoyer l'intervalle
+    }
+
+    // Créer un nouvel intervalle pour la propagation des feux 
+    firePropagationId = setInterval(() => {
+        const cellsOnFire = []; // Liste des cellules en feu actuellement
+
+        // Identifier toutes les cellules en feu
+        for (let i = 0; i < taille; i++) {
+            for (let j = 0; j < taille; j++) {
+                if (city[i][j].fire) { // Vérifie si une cellule est en feu
+                    cellsOnFire.push([i, j]); // AJoute la cellule en feu à la liste des cellules en feu actuellement
+                }
+            }
+        }
+
+        // Propage le feu à partir des cellules identifiées comme étant en feu actuellement
+        cellsOnFire.forEach(([x, y]) => {
+            if (!gridLock) {
+                gridLock = true;
+                propagateFire(city, x, y, taille); // Propage le feu aux cellules voisines de celle en feu
+                gridLock = false;
+            }
+        });
+
+        let svgContent = updateGrid(city, taille, cellSize, robots); // Mettre à jour la grille SVG
+        grid.innerHTML = svgContent; // Afficher la grille mise à jour
+    }, fireSpeed); // Vitesse de propagation des feux 
+
+    return firePropagationId; // Retourner l'intervalle pour gestion future
 }
 
 // Fonction pour récupérer un rect par son ID
@@ -438,12 +476,12 @@ function getRectById(rectId) {
     return rect;
 }
 
-function startFirePropagation(city, taille, grid, cellSize, firePropagationIntervalId) {
-    if (firePropagationIntervalId) {
-        clearInterval(firePropagationIntervalId); // Nettoyer le précédent intervalle
+function startFirePropagation(city, taille, grid, cellSize, startFireSimulationIntervalId) {
+    if (startFireSimulationIntervalId) {
+        clearInterval(startFireSimulationIntervalId); // Nettoyer le précédent intervalle
     }
 
-    firePropagationIntervalId = setInterval(() => {
+    startFireSimulationIntervalId = setInterval(() => {
         const updatedRects = document.querySelectorAll('rect');
         updatedRects.forEach((rect) => {
             const x = parseInt(rect.getAttribute('x') / cellSize);
@@ -459,7 +497,7 @@ function startFirePropagation(city, taille, grid, cellSize, firePropagationInter
         });
     }, 100); // Propage le feu à chaque itération
 
-    return firePropagationIntervalId;
+    return startFireSimulationIntervalId;
 }
 
 // Fonction pour afficher les performances de la simulation
@@ -500,12 +538,15 @@ document.addEventListener('DOMContentLoaded', async function () {
     let robotCount = 7; // Nombre initial de robots
     robots = []; // Liste vide pour les robots
     let intervalId; // ID pour gérer l'intervalle de mouvement des robots
-    let firePropagationIntervalId;
+    let startFireSimulationIntervalId; // ID pour gérer l'intervalle de début des feux au lancement de la simulation
+    let firePropagationId; // ID pour gérer l'intervalle de propagation des feux 
     let robotSpeed = 500; // Vitesse des robots en millisecondes
+    let fireSpeed = 2000; // Vitesse de propagation des feux en millisecondes
     let humanCount = 10; // Nombre initial de survivants
     let totalSurvivants = 0;  // Nombre total de survivants
     let totalHumans = 0;  // Nombre total d'humains
     let totalHumansInDanger = 0;  // Nombre d'humains en danger
+    let gridLock = false; // Gestion des conflits entre les intervalles avec un verrou 
 
     // ================================================================
     // ÉLÉMENTS DU DOM (Interface utilisateur)
@@ -515,6 +556,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     const removeRobotButton = document.getElementById('removeRobot'); // Bouton pour supprimer un robot
     const robotCountDisplay = document.getElementById('robotCount'); // Affichage du nombre de robots
     const robotSpeedInput = document.getElementById('robotSpeedPara'); // Entrée pour ajuster la vitesse des robots
+    const fireSpeedInput = document.getElementById('fireSpeedPara'); // Entrée pour ajuster la vitesse de propagation des feux
     const humanCountInput = document.getElementById('humanCountInput'); // Entrée pour ajuster le nombre d'humains
     const startSimulation = document.getElementById('startSimulation'); // Bouton pour démarrer le mouvement des robots
     const resetButton = document.getElementById('resetSimulation'); // Bouton pour réinitialiser la simulation
@@ -533,6 +575,16 @@ document.addEventListener('DOMContentLoaded', async function () {
         if (intervalId) {
             clearInterval(intervalId); // Nettoyer l'intervalle existant
             intervalId = startRobotMovement(robots, city, taille, intervalId, grid, cellSize, robotSpeed); // Redémarrer avec la nouvelle vitesse
+        }
+    });
+
+    // Modifier la vitesse de propagation des feux 
+    fireSpeedInput.addEventListener('input', function (e) {
+        fireSpeed = parseFloat(e.target.value) * 1000; // Convertir la vitesse en millisecondes
+        // Réajuster l'intervalle avec la nouvelle vitesse
+        if (firePropagationId) {
+            clearInterval(firePropagationId); // Nettoyer l'intervalle existant
+            firePropagationId = propagateFireInterval(city, taille, grid, cellSize, fireSpeed, firePropagationId); // Redémarrer avec la nouvelle vitesse
         }
     });
 
@@ -679,8 +731,9 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     // Démarrer les les robots après avoir cliqué sur le bouton de démarrage
     startSimulation.addEventListener('click', () => {
-        intervalId = startRobotMovement(robots, city, taille, intervalId, grid, cellSize, robotSpeed);
-        firePropagationIntervalId = startFirePropagation(city,taille,grid,cellSize,firePropagationIntervalId);
+        intervalId = startRobotMovement(robots, city, taille, intervalId, grid, cellSize, robotSpeed,gridLock);
+        startFireSimulationIntervalId = startFirePropagation(city,taille,grid,cellSize,startFireSimulationIntervalId);
+        firePropagationId = propagateFireInterval(city,taille,grid,cellSize,robots,fireSpeed,firePropagationId,gridLock);
     });
 
     // updateHumansCount();
