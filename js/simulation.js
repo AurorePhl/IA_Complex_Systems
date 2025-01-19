@@ -8,6 +8,18 @@
 // FONCTIONS  
 // ================================================================
 
+// Démarre les workers au lancement de la simulation 
+function startSImulation() {
+
+}
+
+// Nettoie les workers à la fin de la simulation
+function stopSimulation() {
+    robotWorker.terminate(); // Nettoie le worker qui gère le mouvement des robots
+    fireWorker.terminate(); // Nettoie le worker qui gère la propagation des incendies
+    console.log("Simulation terminée."); // Message de fin de simulation envoyé dans la console 
+}
+
 // Fonction d'initialisation de la grille de la ville
 // Crée une grille carrée de taille 'taille' avec des cases initialisées à des valeurs par défaut
 function initGrid(city, taille, humanCount) {
@@ -555,6 +567,8 @@ document.addEventListener('DOMContentLoaded', async function () {
     // ================================================================
     // ÉLÉMENTS DU DOM (Interface utilisateur)
     // ================================================================
+    const robotWorker = new Worker('robotWorker.js'); // Web Worker pour le déplacement des robots
+    const fireWorker = new Worker('fireWorker.js'); // Web Worker pour la propagation des incendies 
     const grid = document.getElementById('grid'); // Grille où les robots seront affichés
     const addRobotButton = document.getElementById('addRobot'); // Bouton pour ajouter un robot
     const removeRobotButton = document.getElementById('removeRobot'); // Bouton pour supprimer un robot
