@@ -144,7 +144,7 @@ function generateRandomId() {
 // Fonction pour placer des robots de manière aléatoire dans la grille
 function placeRobots(city, taille, count) {
     let robots = [];
-    let robotColor = ['red', 'blue', 'green', 'yellow', 'purple', 'orange', 'pink']; // Palette de couleurs pour les robots
+    let robotColor = ['tomato', 'blue', 'green', 'yellow', 'purple', 'orange', 'pink']; // Palette de couleurs pour les robots
 
     let mid = Math.floor(taille / 2); // Positionner les robots au centre de la grille
 
@@ -410,6 +410,10 @@ function propagateFire(city, x, y, taille) {
         [0, -1], // Gauche
         [1, 0], // Bas
         [-1, 0], // Haut
+        [1, 1],  // Bas-Droite
+        [1, -1], // Bas-Gauche
+        [-1, 1], // Haut-Droite
+        [-1, -1] // Haut-Gauche
     ];
 
     directions.forEach(([dx, dy]) => {
