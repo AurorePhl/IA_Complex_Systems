@@ -9,7 +9,7 @@
 // ================================================================
 
 // Démarre les workers au lancement de la simulation 
-function startSImulation() {
+function startSimulation() {
 
 }
 
