@@ -76,7 +76,7 @@ Les robots adoptent des rôles spécifiques en fonction des besoins :
    - Incendie peu étendu : Explorateur-Sauveur.  
    - Incendie moyennement étendu : Explorateur-Sauveur-Pompier.   
    - Incendie très étendu : Explorateur-Pompier.  
-4. **Fin :** Surcharge des robots au quartier général.  
+4. **Fin :** Surcharge des robots au quartier général (si n'arrive pas à éteindre l'incendie).  
 
 **Performance :**  
 - **Temps d'exécution :** Environ 2 minutes.  
