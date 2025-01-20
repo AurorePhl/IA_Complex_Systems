@@ -37,13 +37,14 @@ Sélectionnez une ou plusieurs cellules cliquables pour définir les emplacement
 Les robots adoptent des rôles spécifiques en fonction des besoins :  
 - **Explorateur :** Exploration aléatoire de la ville. 
 - **Explorateur-Sauveur :** Priorité donnée au sauvetage des humains tout en explorant.  
-- **Explorateur-Pompier :** Priorité donnée à la gestion des incendies tout en explorant.  
-
-**Surcharge observée :** Les robots ont tendance à se regrouper au quartier général lorsque l'incendie prend trop d'ampleur. 
+- **Explorateur-Pompier :** Priorité donnée à la gestion des incendies tout en explorant.   
 
 #### Comportement émergent
 - Les robots élaborent une stratégie d'**exploration étendue**, évitant généralement de se croiser entre eux.  
 - Une tendance naturelle émerge pour explorer en priorité les cellules les plus fréquentées.  
+
+#### Limites 
+**Surcharge observée :** Les robots ont tendance à se regrouper au quartier général lorsque l'incendie prend trop d'ampleur.  
 
 ---
 
