@@ -317,12 +317,14 @@ function moveRobot(city, robot, taille) {
 
     if (isValidPosition(newX, newY, taille)) { // Vérifier si la nouvelle position est valide
         updateRobotPosition(city, robot, newX, newY); // Mettre à jour la position du robot
+        // SI ROLE PREDEFINI
         // if (robot.role === 'pompier') {
         //     pompierAction(city, robot, newX, newY); // Gérer l'interaction avec le feu
         // }
         // else if (robot.role === 'sauveur') {
         //     humanAction(city, robot, newX, newY, taille); // Gérer l'interaction avec les humains
         // }
+        // SINON 
         robotAction(city, robot, newX, newY, taille); // Gérer l'interaction avec les humains et avec le feu
         checkEpuise(city, robot, newX, newY); // Gérer l'épuisement du robot
         checkFinish(city, robot, newX, newY); // Vérifier si tous les humains ont été détectés
@@ -371,7 +373,7 @@ function determineDirection(city, robot) {
     // Si le robot a un humain, il retourne également au QG
     if (robot.hasHuman) {
         return getDirectionToQG(city, robot);
-    } else if (city[robot.x][robot.y].cri) { // Si un cri est détecté
+    } else if (city[robot.x][robot.y].cri) { // Si un cri est détecté // && robot.role === 'sauveur' SI ROLE PREDEFINI
         let cri = city[robot.x][robot.y].cri; // Récupérer la position du cri
         return { dx: Math.sign(cri.x - robot.x), dy: Math.sign(cri.y - robot.y) }; // Se diriger vers le cri
     } else if (city[robot.x][robot.y].messageRetourQG) { // Si un message de retour au QG est détecté
@@ -497,27 +499,29 @@ function robotAction(city, robot, newX, newY, taille) { // Gérer l'interaction 
 function pompierAction(city, robot, newX, newY) { // Gérer l'interaction avec le feu
     if (city[newX][newY].fire && !robot.epuise) { // Si la cellule est en feu
         robot.stopped = true; // Arrêter le robot
+        increaseDanger(city, newX, newY, taille, 1); // Augmenter le danger (feu détecté)
         setTimeout(() => { // Après 3 secondes
             city[newX][newY].fire = false; // Éteindre le feu
-            decreaseDanger(city, newX, newY, taille, 1); // Diminuer le danger (éteindre le feu)
             robot.stopped = false; // Redémarrer le robot
             let svgContent = updateGrid(city, taille, cellSize, robots); // Mettre à jour la grille SVG
             grid.innerHTML = svgContent; // Afficher la grille mise à jour
         }, 3000);
         robot.epuise = true;    // Le robot est épuisé
     }
+    if (!city[newX][newY].fire) { // Si la cellule n'est pas en feu
+        decreaseDanger(city, newX, newY, taille, 1); // Case non incendiée, diminuer le danger
+    }
 }
 
 function humanAction(city, robot, newX, newY, taille) { // Gérer l'interaction avec les humains
-
     if (robot.hasHuman && city[newX][newY].qg) { // Si le robot a un humain et est au QG
         robot.hasHuman = false; // Lâcher l'humain
     } else if (!robot.hasHuman && city[newX][newY].human.present && !city[newX][newY].human.mort) { // Si le robot n'a pas d'humain et qu'un humain est présent et non mort
+        increaseDanger(city, newX, newY, taille, 1); // Augmenter le danger (humain détecté)
         robot.hasHuman = true;  // Prendre l'humain
         sendInformation(city); // Envoyer l'information au QG
         city[newX][newY].human.present = false; // Marquer l'humain comme plus présent
         removeCriHumans(city, newX, newY, taille);  // Enlever le cri des cellules adjacentes
-        decreaseDanger(city, newX, newY, taille, 1); // Diminuer le danger (humain sauvé)
         let mid = Math.floor(taille / 2);
         if (city[mid][mid].qg.totalSurvivants + city[mid][mid].qg.totalMorts === city[mid][mid].qg.totalHumans) {
             diffuseRetourQG(city, taille);
@@ -534,7 +538,7 @@ function humanAction(city, robot, newX, newY, taille) { // Gérer l'interaction 
         }
     } else if (!robot.hasHuman && city[newX][newY].cri) {
         increaseDanger(city, newX, newY, taille, 0.5); // Cri détecté, augmenter légèrement le danger
-    } else if (!robot.hasHuman && !city[newX][newY].human.present) {
+    } else if (!robot.hasHuman && !city[newX][newY].human.present && !city[newX][newY].fire) {
         decreaseDanger(city, newX, newY, taille, 1); // Case blanche, diminuer le danger
     } else if (city[newX][newY].human.present === false) { // si il n'y a pas d'humain
         const positionExists = robot.PosLocal.some(pos => pos.x === newX && pos.y === newY); // Vérifier si la position existe déjà en local
