@@ -13,7 +13,7 @@ Auteures : DURET Laura et PHILIPPE Aurore
 - **Vitesse de propagation des incendies aux cases voisines :** 10 secondes  
 
 **Instructions :**  
-Sélectionnez une ou plusieurs cellules cliquables pour définir les emplacements de départ de feu avant de lancer la simulation.    
+Sélectionnez zéro, une ou plusieurs cellules cliquables pour définir les emplacements de départ de feu avant de lancer la simulation.    
 
 ---
 
