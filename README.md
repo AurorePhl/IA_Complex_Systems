@@ -1,7 +1,7 @@
-# IA_Complex_Systems
-## Système d’Exploration Autonome par Robots d’Essaim pour la Gestion d’Incendies
+# UE : IA Systèmes Complexes  
+## Projet : Système d’Exploration Autonome par Robots d’Essaim pour la Gestion d’Incendies  
 Date : 20/01/2025  
-Auteures : DURET Laura et PHILIPPE Aurore
+Auteures : DURET Laura et PHILIPPE Aurore  
 
 ---
 
