@@ -70,9 +70,10 @@ Les robots adoptent des rôles spécifiques en fonction des besoins :
 **Déroulement :**  
 1. **Départ :** Exploration aléatoire.  
 2. **Émergence :** Une stratégie d’exploration étendue apparaît.  
-3. **Évolution des rôles :** spécialisation des robots n fonction de l'ampleur des incendies.  
-   - Incendie peu étendu : Explorateur simple.  
-   - Incendie moyennement étendu : Explorateur-Sauveur.   
+3. **Évolution des rôles :** spécialisation des robots en fonction de l'ampleur des incendies.  
+   - Début de départ de feu : Explorateur simple.  
+   - Incendie peu étendu : Explorateur-Sauveur.  
+   - Incendie moyennement étendu : Explorateur-Sauveur-Pompier.   
    - Incendie très étendu : Explorateur-Pompier.  
 4. **Fin :** Surcharge des robots au quartier général.  
 
