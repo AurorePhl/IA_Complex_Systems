@@ -50,7 +50,7 @@ Les robots adoptent des rôles spécifiques en fonction des besoins :
 
 ### Scénarios de simulation
 
-#### 1. Monotâche (Sauvetage des humains uniquement)
+#### 1. **Monotâche** (Sauvetage des humains uniquement)
 **Paramètres :**  
 - Utilisation des paramètres par défaut.  
 
@@ -63,7 +63,7 @@ Les robots adoptent des rôles spécifiques en fonction des besoins :
 - **Temps d'exécution :** Environ 2 minutes.  
 - **Taux de sauvetage des humains :** 100%.  
 
-#### 2. Multitâche (Sauvetage des humains et gestion des incendies)
+#### 2. **Multitâche** (Sauvetage des humains et gestion des incendies)
 **Paramètres :**  
 - Utilisation des paramètres par défaut.  
 - Ajout d’un départ de feu au lancement.  
