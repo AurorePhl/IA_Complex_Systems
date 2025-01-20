@@ -440,6 +440,9 @@ function robotAction(city, robot, newX, newY, taille) { // Gérer l'interaction 
         }, 3000);
         robot.epuise = true;    // Le robot est épuisé
     }
+    if (!city[newX][newY].fire) { // Si la cellule n'est pas en feu
+        decreaseDanger(city, newX, newY, taille, 1); // Case non incendiée, diminuer le danger
+    }
     if (robot.hasHuman && city[newX][newY].qg) { // Si le robot a un humain et est au QG
         robot.hasHuman = false; // Lâcher l'humain
     } else if (!robot.hasHuman && city[newX][newY].human.present && !city[newX][newY].human.mort) { // Si le robot n'a pas d'humain et qu'un humain est présent et non mort
