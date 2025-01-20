@@ -1,6 +1,6 @@
 # IA_Complex_Systems
 ## Système d’Exploration Autonome par Robots d’Essaim pour la Gestion d’Incendies
-Date : 20/01/2025
+Date : 20/01/2025  
 Auteures : DURET Laura et PHILIPPE Aurore
 
 ---
@@ -70,9 +70,10 @@ Les robots adoptent des rôles spécifiques en fonction des besoins :
 **Déroulement :**  
 1. **Départ :** Exploration aléatoire.  
 2. **Émergence :** Une stratégie d’exploration étendue apparaît.  
-3. **Évolution des rôles :**  
-   - Les robots se spécialisent en fonction de l'ampleur des ncendies.  
-   - Rôles : Explorateur simple, Explorateur-Sauveur, Explorateur-Pompier.  
+3. **Évolution des rôles :** spécialisation des robots n fonction de l'ampleur des incendies.  
+   - Incendie peu étendu : Explorateur simple.  
+   - Incendie moyennement étendu : Explorateur-Sauveur.   
+   - Incendie très étendu : Explorateur-Pompier.  
 4. **Fin :** Surcharge des robots au quartier général.  
 
 **Performance :**  
